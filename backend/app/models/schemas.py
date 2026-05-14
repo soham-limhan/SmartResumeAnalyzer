@@ -52,6 +52,7 @@ class AnalysisRecord(BaseModel):
     resume_text: str = ""
     analysis: ResumeAnalysis
     job_description: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 class UploadResponse(BaseModel):

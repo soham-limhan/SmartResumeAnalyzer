@@ -1,25 +1,35 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard,
   Upload,
   History,
   Settings,
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  LogOut,
+  LogIn,
+  User,
 } from 'lucide-react';
 import { useState } from 'react';
-
-const navItems = [
-  { to: '/dashboard', icon: Upload, label: 'Upload' },
-  { to: '/history', icon: History, label: 'History' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
-];
+import { useAuth } from '@/context/AuthContext';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const navItems = [
+    { to: '/dashboard', icon: Upload, label: 'Upload' },
+    { to: '/history', icon: History, label: 'History' },
+    { to: '/settings', icon: Settings, label: 'Settings' },
+  ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <motion.aside
@@ -89,8 +99,71 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle */}
-      <div className="p-3 border-t border-border/50">
+      {/* User section + logout/login */}
+      <div className="p-3 border-t border-border/50 space-y-2">
+        {/* User info */}
+        {user && !collapsed && (
+          <div className="flex items-center gap-3 px-3 py-2">
+            {user.picture ? (
+              <img
+                src={user.picture}
+                alt={user.name}
+                className="w-7 h-7 rounded-full flex-shrink-0"
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <div className="overflow-hidden">
+              <p className="text-xs font-medium truncate">{user.name || 'User'}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Auth button */}
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="overflow-hidden whitespace-nowrap"
+                >
+                  Sign Out
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+          >
+            <LogIn className="w-5 h-5 flex-shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="overflow-hidden whitespace-nowrap"
+                >
+                  Sign In
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        )}
+
+        {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"

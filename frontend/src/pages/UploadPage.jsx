@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import GlassCard from '@/components/shared/GlassCard';
 import { uploadResume } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 // Estimated analysis time in seconds (adjust based on your Ollama model speed)
 const ESTIMATED_ANALYSIS_SECONDS = 45;
@@ -23,6 +24,7 @@ function formatTime(seconds) {
 
 export default function UploadPage() {
   const navigate = useNavigate();
+  const { user, addGuestAnalysis } = useAuth();
   const [file, setFile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -96,6 +98,16 @@ export default function UploadPage() {
       setStage('done');
 
       // Navigate to results after brief success state
+      // Store guest analysis in context (volatile)
+      if (!user && result) {
+        addGuestAnalysis({
+          id: result.id,
+          filename: result.filename || file.name,
+          uploaded_at: result.uploaded_at || new Date().toISOString(),
+          analysis: result.analysis,
+        });
+      }
+
       setTimeout(() => {
         navigate(`/analysis/${result.id}`, { state: { analysis: result } });
       }, 800);

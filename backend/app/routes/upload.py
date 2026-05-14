@@ -1,27 +1,28 @@
 """Upload and analysis API routes."""
 
-import os
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException, Depends
 
 from app.config import settings
 from app.models.schemas import AnalysisRecord, UploadResponse, ErrorResponse
 from app.services.extractor import extract_text
 from app.services.analyzer import analyze_resume
+from app.services.auth import get_current_user
+from app.database import get_db
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# In-memory storage for analysis records
-_analysis_store: dict[str, AnalysisRecord] = {}
+# In-memory store for guest (unauthenticated) analyses — volatile
+_guest_store: dict[str, AnalysisRecord] = {}
 
 
-def get_store() -> dict[str, AnalysisRecord]:
-    """Get the analysis store (used by other route modules)."""
-    return _analysis_store
+def get_guest_store() -> dict[str, AnalysisRecord]:
+    """Get the guest analysis store (used by other route modules)."""
+    return _guest_store
 
 
 @router.post(
@@ -32,11 +33,15 @@ def get_store() -> dict[str, AnalysisRecord]:
 async def upload_and_analyze(
     file: UploadFile = File(..., description="Resume file (PDF or DOCX)"),
     job_description: Optional[str] = Form(None, description="Optional job description for matching"),
+    user: Optional[dict] = Depends(get_current_user),
 ):
     """Upload a resume file and get AI-powered analysis.
 
     Accepts PDF and DOCX files up to 10MB. Returns structured analysis
     including ATS score, skill assessment, and actionable recommendations.
+
+    - Authenticated users: analysis is persisted to Firestore.
+    - Guests: analysis is returned but stored only in-memory (lost on server restart).
     """
     # Validate file type
     if not file.filename:
@@ -51,7 +56,7 @@ async def upload_and_analyze(
 
     # Validate file size
     content = await file.read()
-    await file.seek(0)  # Reset for extraction
+    await file.seek(0)
 
     size_mb = len(content) / (1024 * 1024)
     if size_mb > settings.max_upload_size_mb:
@@ -76,7 +81,7 @@ async def upload_and_analyze(
         # Run AI analysis
         analysis = await analyze_resume(resume_text, job_description)
 
-        # Save to store
+        # Create record
         record = AnalysisRecord(
             filename=file.filename,
             file_size=len(content),
@@ -84,13 +89,21 @@ async def upload_and_analyze(
             resume_text=resume_text,
             analysis=analysis,
             job_description=job_description,
+            user_id=user["uid"] if user else None,
         )
-        _analysis_store[record.id] = record
 
-        # Save file to disk
-        upload_path = os.path.join(settings.upload_dir, f"{record.id}_{file.filename}")
-        with open(upload_path, "wb") as f:
-            f.write(content)
+        # Persist based on auth status
+        if user:
+            # Authenticated → save to Firestore
+            db = get_db()
+            doc_data = record.model_dump()
+            doc_data["uploaded_at"] = record.uploaded_at.isoformat()
+            db.collection("analyses").document(record.id).set(doc_data)
+            logger.info(f"Analysis saved to Firestore for user {user['uid']}")
+        else:
+            # Guest → in-memory only
+            _guest_store[record.id] = record
+            logger.info(f"Guest analysis stored in-memory: {record.id}")
 
         logger.info(f"Analysis complete for {file.filename} — ATS Score: {analysis.ats_score}")
 
@@ -106,5 +119,7 @@ async def upload_and_analyze(
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
         logger.exception(f"Unexpected error processing {file.filename}")
         raise HTTPException(status_code=500, detail=f"Internal error: {e}")

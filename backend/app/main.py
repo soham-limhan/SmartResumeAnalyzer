@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import upload, history, export
+from app.routes import upload, history, export, auth
+from app.database import init_firebase
 
 
 @asynccontextmanager
@@ -19,8 +20,15 @@ async def lifespan(app: FastAPI):
     print(f"[UPLOAD]  Upload directory: {settings.upload_dir}")
     print(f"[AI]      Provider: {settings.ai_provider.upper()}")
 
+    # Initialize Firebase
+    try:
+        init_firebase()
+        print("[OK]      Firebase initialized successfully")
+    except Exception as e:
+        print(f"[ERROR]   Firebase initialization failed: {e}")
+        raise
+
     if settings.ai_provider == "groq":
-        # Validate Groq API key
         print(f"[AI]      Groq model: {settings.groq_model}")
         try:
             from groq import Groq
@@ -31,14 +39,12 @@ async def lifespan(app: FastAPI):
             print(f"[WARN]    Groq connection check failed: {e}")
             print("          Analysis may fail. Check your SMARTRESUME_GROQ_API_KEY.")
     else:
-        # Check Ollama connectivity and warm up the model
         print(f"[AI]      Ollama model: {settings.ollama_model} @ {settings.ollama_host}")
         try:
             import ollama
             ollama.list()
             print("[OK]      Ollama connection successful")
 
-            # Warm up the LLM - loads model weights into memory for fast first inference
             print(f"[WARMUP]  Loading '{settings.ollama_model}' into memory...")
             try:
                 warmup_response = ollama.chat(
@@ -78,6 +84,7 @@ app.add_middleware(
 )
 
 # Routes
+app.include_router(auth.router, prefix="/api", tags=["Authentication"])
 app.include_router(upload.router, prefix="/api", tags=["Upload & Analysis"])
 app.include_router(history.router, prefix="/api", tags=["History"])
 app.include_router(export.router, prefix="/api", tags=["Export"])

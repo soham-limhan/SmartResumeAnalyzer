@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from '@/lib/firebase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -6,6 +7,20 @@ const api = axios.create({
   headers: {
     'Accept': 'application/json',
   },
+});
+
+// Request interceptor — attach Firebase ID token if user is signed in
+api.interceptors.request.use(async (config) => {
+  try {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const token = await currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // Proceed without auth header (guest mode)
+  }
+  return config;
 });
 
 // Upload resume and get analysis

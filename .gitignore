@@ -8,10 +8,12 @@ __pycache__/
 .env
 .env.local
 .env.production
+firebase-key.json
 
 # Build output
 frontend/dist/
 backend/uploads/
+backend/firebase-key.json
 
 # IDE
 .vscode/

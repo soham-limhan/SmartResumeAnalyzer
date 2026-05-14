@@ -1,5 +1,6 @@
 """Application configuration and settings."""
 
+import os
 from typing import Optional
 from pydantic_settings import BaseSettings
 
@@ -20,6 +21,14 @@ class Settings(BaseSettings):
     ollama_host: str = "http://localhost:11434"
     ollama_model: str = "resume-analyzer"
     ollama_timeout: int = 120
+
+    # Firebase
+    firebase_credentials_path: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "firebase-key.json",
+    )
+    # For production (Render): base64-encoded service account JSON
+    firebase_credentials_base64: Optional[str] = None
 
     # CORS
     cors_origins: list[str] = [

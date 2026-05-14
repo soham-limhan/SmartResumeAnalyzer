@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-
 import { AnimatePresence } from 'framer-motion';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
@@ -44,7 +45,7 @@ function AnimatedRoutes() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
 
-        {/* Dashboard pages */}
+        {/* Dashboard pages — accessible to both guests and authenticated users */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UploadPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
@@ -59,11 +60,13 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <ThemeProvider>
-      <TooltipProvider>
-        <BrowserRouter>
-          <AnimatedRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <AnimatedRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
