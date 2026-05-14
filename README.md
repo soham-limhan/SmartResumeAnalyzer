@@ -12,52 +12,52 @@ A production-grade AI-powered resume analysis platform with a futuristic dark gl
 | **Animations** | Framer Motion |
 | **Charts** | Recharts |
 | **Backend** | FastAPI + Uvicorn |
-| **AI Engine** | Ollama (custom `resume-analyzer` model) |
+| **AI Engine** | Groq Cloud (llama-3.3-70b) / Ollama Local (fallback) |
 | **Text Extraction** | PyMuPDF (PDF) + python-docx (DOCX) |
 
 ## Features
 
-- 📄 Upload PDF/DOCX resumes with drag-and-drop
-- 📊 Animated ATS score visualization (circular meter)
-- 🎯 Missing skill detection with severity tags
-- 💡 AI-generated improvement suggestions
-- 🔍 Resume keyword frequency analysis with charts
-- 👨‍💼 Recruiter-perspective feedback
-- ✨ AI-generated professional summary
-- ❓ Tailored interview question generation
-- 📈 Skill proficiency heatmap + radar chart
-- 📋 Resume-job description matching
-- 📥 Export analysis reports (JSON/Text)
-- 🌗 Dark/Light mode toggle
-- 📱 Fully responsive (mobile, tablet, desktop)
-- 🎨 Glassmorphism UI with animated gradients
+- Upload PDF/DOCX resumes with drag-and-drop
+- Animated ATS score visualization (circular meter)
+- Missing skill detection with severity tags
+- AI-generated improvement suggestions
+- Resume keyword frequency analysis with charts
+- Skill heatmap and radar chart visualization
+- Potential interview questions
+- Recruiter perspective feedback
+- PDF report export
+- Analysis history
+- ETA timer for AI processing
 
-## Quick Start
+## Quick Start (Local Development)
 
 ### Prerequisites
 
-- **Node.js** 18+
-- **Python** 3.10+
-- **Ollama** installed and running
+- Node.js 18+
+- Python 3.11+
+- (Optional) [Ollama](https://ollama.com) for local AI
 
-### 1. Create the AI Model
-
-```bash
-cd backend
-ollama create resume-analyzer -f Modelfile
-```
-
-### 2. Start the Backend
+### 1. Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
+```
+
+**Option A — Groq Cloud (recommended):**
+```bash
+# Create .env file
+echo SMARTRESUME_GROQ_API_KEY=gsk_your_key_here > .env
 python run.py
 ```
 
-The API will be available at `http://localhost:8000`.
+**Option B — Local Ollama:**
+```bash
+ollama create resume-analyzer -f Modelfile
+python run.py
+```
 
-### 3. Start the Frontend
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -65,41 +65,81 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173` — the Vite proxy routes API calls to the backend.
+
+---
+
+## Deployment (Free Tier)
+
+### Frontend — Vercel
+
+1. Push to GitHub
+2. Import repo on [vercel.com](https://vercel.com)
+3. Configure:
+   - **Root Directory**: `frontend`
+   - **Framework**: Vite
+   - **Build Command**: `npm run build`
+   - **Output**: `dist`
+   - **Env var**: `VITE_API_URL` = `https://your-backend.onrender.com/api`
+
+### Backend — Render
+
+1. Connect GitHub repo on [render.com](https://render.com)
+2. Create **Web Service**:
+   - **Root Directory**: `backend`
+   - **Runtime**: Docker
+   - **Instance**: Free
+3. Environment variables:
+
+   | Variable | Value |
+   |---|---|
+   | `SMARTRESUME_GROQ_API_KEY` | Your Groq API key |
+   | `SMARTRESUME_CORS_ORIGINS` | `["https://your-app.vercel.app"]` |
+   | `SMARTRESUME_DEBUG` | `false` |
+
+### Get Groq API Key (Free)
+
+1. Sign up at [console.groq.com](https://console.groq.com)
+2. Create an API key
+3. Free tier: 14,400 requests/day, llama-3.3-70b
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `SMARTRESUME_GROQ_API_KEY` | None | Groq API key (enables cloud AI) |
+| `SMARTRESUME_GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model ID |
+| `SMARTRESUME_OLLAMA_HOST` | `http://localhost:11434` | Ollama host (local fallback) |
+| `SMARTRESUME_OLLAMA_MODEL` | `resume-analyzer` | Ollama model name |
+| `SMARTRESUME_CORS_ORIGINS` | `["http://localhost:5173"]` | Allowed CORS origins |
+| `SMARTRESUME_DEBUG` | `true` | Debug mode |
+| `VITE_API_URL` | `/api` | Backend URL (frontend, production only) |
+
+---
 
 ## Project Structure
 
 ```
 SmartResume/
-├── frontend/                  # React + Vite
+├── frontend/               # React + Vite SPA
 │   ├── src/
-│   │   ├── components/       # UI components
-│   │   │   ├── ui/           # ShadCN components
-│   │   │   ├── layout/       # Sidebar, Header
-│   │   │   └── shared/       # Particles, GlassCard, etc.
-│   │   ├── pages/            # Route pages
-│   │   ├── context/          # Theme provider
-│   │   └── lib/              # API client, utils
-│   └── ...
-├── backend/                   # FastAPI
+│   │   ├── components/     # UI components
+│   │   ├── pages/          # Route pages
+│   │   ├── lib/            # API client, PDF generator
+│   │   └── context/        # Theme context
+│   └── package.json
+├── backend/                # FastAPI server
 │   ├── app/
-│   │   ├── routes/           # API endpoints
-│   │   ├── services/         # Business logic
-│   │   ├── models/           # Pydantic schemas
-│   │   └── utils/            # Prompt templates
-│   ├── Modelfile             # Ollama model config
+│   │   ├── main.py         # App entry point
+│   │   ├── config.py       # Settings (env vars)
+│   │   ├── routes/         # API endpoints
+│   │   ├── services/       # AI analyzer, text extractor
+│   │   ├── models/         # Pydantic schemas
+│   │   └── utils/          # Prompt templates
+│   ├── Dockerfile          # Container config
+│   ├── Modelfile           # Ollama model definition
 │   └── requirements.txt
-└── README.md
+└── .gitignore
 ```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/upload` | Upload resume + get AI analysis |
-| `POST` | `/api/upload` | Upload resume + job desc for matching |
-| `GET` | `/api/history` | List all past analyses |
-| `GET` | `/api/history/:id` | Get specific analysis |
-| `DELETE` | `/api/history/:id` | Delete analysis |
-| `GET` | `/api/export/:id` | Export analysis report |
-| `GET` | `/api/health` | Health check + Ollama status |
