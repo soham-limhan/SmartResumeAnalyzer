@@ -75,8 +75,12 @@ export default function RegisterPage() {
         setError('Password is too weak. Please use a stronger password.');
       } else if (code === 'auth/invalid-email') {
         setError('Invalid email address format.');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Email/Password sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method.');
+      } else if (code === 'auth/configuration-not-found') {
+        setError('Firebase Auth is not configured. Please enable Authentication in Firebase Console.');
       } else {
-        setError('Registration failed. Please try again.');
+        setError(`Registration failed (${code || err.message}). Please try again.`);
       }
     } finally {
       setLoading(false);
