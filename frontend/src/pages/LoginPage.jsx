@@ -48,8 +48,10 @@ export default function LoginPage() {
         setError('Invalid email or password.');
       } else if (code === 'auth/too-many-requests') {
         setError('Too many attempts. Please try again later.');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Email/Password sign-in is not enabled in Firebase Console.');
       } else {
-        setError('Sign in failed. Please try again.');
+        setError(`Sign in failed (${code || err.message}).`);
       }
     } finally {
       setLoading(false);
@@ -63,8 +65,12 @@ export default function LoginPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-in failed. Please try again.');
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // User closed the popup, not an error
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized for Google sign-in. Add it in Firebase Console → Auth → Settings → Authorized domains.');
+      } else {
+        setError(`Google sign-in failed (${err.code || err.message}).`);
       }
     } finally {
       setLoading(false);

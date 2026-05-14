@@ -94,8 +94,12 @@ export default function RegisterPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-up failed. Please try again.');
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // User closed popup
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized. Add it in Firebase Console → Auth → Settings → Authorized domains.');
+      } else {
+        setError(`Google sign-up failed (${err.code || err.message}).`);
       }
     } finally {
       setLoading(false);
