@@ -18,6 +18,24 @@ import { useAuth } from '@/context/AuthContext';
 const ESTIMATED_PER_RESUME_SECONDS = 30;
 const MAX_FILES = 25;
 
+// Allowed file types (defense-in-depth — also enforced by the backend)
+const ALLOWED_EXTENSIONS = ['pdf', 'docx'];
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+function isFileAllowed(file) {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  const hasValidExt = ALLOWED_EXTENSIONS.includes(ext);
+  const hasValidMime = ALLOWED_MIME_TYPES.includes(file.type) || file.type === ''; // some OS don't set type
+  // Reject double-extension tricks (e.g. resume.pdf.exe)
+  const parts = file.name.split('.');
+  const hasDoubleExtTrick =
+    parts.length > 2 && !parts.slice(1).every((p) => ALLOWED_EXTENSIONS.includes(p.toLowerCase()));
+  return hasValidExt && hasValidMime && !hasDoubleExtTrick;
+}
+
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -72,15 +90,49 @@ export default function UploadPage() {
 
   const onDrop = useCallback((accepted, rejected) => {
     setError(null);
+
+    // Collect rejection messages from react-dropzone
+    const rejectionMessages = [];
     if (rejected.length) {
-      const reasons = rejected.map(r => r.errors.map(e => e.message).join(', ')).join('; ');
-      setError(`Some files were rejected: ${reasons}`);
+      rejected.forEach((r) => {
+        const ext = r.file.name.split('.').pop()?.toLowerCase() ?? '';
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
+          rejectionMessages.push(
+            `"${r.file.name}" — only PDF and DOCX files are allowed.`
+          );
+        } else {
+          rejectionMessages.push(
+            `"${r.file.name}" — ${r.errors.map((e) => e.message).join(', ')}`
+          );
+        }
+      });
     }
-    if (accepted.length) {
+
+    // Secondary client-side check on accepted files (defense-in-depth)
+    const safeFiles = [];
+    accepted.forEach((file) => {
+      if (!isFileAllowed(file)) {
+        rejectionMessages.push(
+          `"${file.name}" — suspicious or unsupported file type. Only .pdf and .docx are accepted.`
+        );
+      } else {
+        safeFiles.push(file);
+      }
+    });
+
+    if (rejectionMessages.length) {
+      setError(rejectionMessages.join('\n'));
+    }
+
+    if (safeFiles.length) {
       setFiles((prev) => {
-        const combined = [...prev, ...accepted];
+        const combined = [...prev, ...safeFiles];
         if (combined.length > MAX_FILES) {
-          setError(`Maximum ${MAX_FILES} files allowed. ${combined.length - MAX_FILES} files were dropped.`);
+          setError((e) =>
+            [e, `Maximum ${MAX_FILES} files allowed. ${combined.length - MAX_FILES} file(s) were dropped.`]
+              .filter(Boolean)
+              .join('\n')
+          );
           return combined.slice(0, MAX_FILES);
         }
         return combined;
@@ -101,6 +153,17 @@ export default function UploadPage() {
 
   const handleAnalyze = async () => {
     if (files.length === 0) return;
+
+    // Final pre-flight validation before sending to server
+    const invalid = files.filter((f) => !isFileAllowed(f));
+    if (invalid.length) {
+      setError(
+        `Blocked ${invalid.length} suspicious file(s): ${invalid.map((f) => `"${f.name}"`).join(', ')}. ` +
+        'Only .pdf and .docx files are allowed. Please remove them and try again.'
+      );
+      return;
+    }
+
     setUploading(true);
     setError(null);
     setStage('uploading');

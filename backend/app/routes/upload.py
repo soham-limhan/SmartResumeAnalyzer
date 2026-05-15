@@ -2,6 +2,8 @@
 
 import asyncio
 import logging
+import os
+import re
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException, Depends
@@ -18,6 +20,93 @@ from app.database import get_db
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# ─── File-type magic bytes signatures ───────────────────────────────────────────
+_MAGIC_SIGNATURES = {
+    "pdf": [
+        b"%PDF",           # Standard PDF header
+    ],
+    "docx": [
+        b"PK\x03\x04",    # ZIP archive (DOCX is a ZIP container)
+    ],
+}
+
+# Characters allowed in sanitised filenames
+_SAFE_FILENAME_RE = re.compile(r"[^\w.\- ]", re.UNICODE)
+
+
+def _sanitize_filename(filename: str) -> str:
+    """Sanitize a filename to prevent path-traversal and injection attacks.
+
+    - Strips directory components
+    - Rejects null bytes
+    - Removes non-printable / special characters
+    - Rejects empty names
+    """
+    if "\x00" in filename:
+        raise ValueError("Filename contains null bytes.")
+
+    # Strip directory separators / path traversal
+    filename = os.path.basename(filename)
+    filename = filename.replace("..", "")
+
+    # Remove unsafe characters
+    name, _, ext = filename.rpartition(".")
+    if not name:
+        name = ext
+        ext = ""
+    name = _SAFE_FILENAME_RE.sub("_", name).strip("_") or "upload"
+    ext = _SAFE_FILENAME_RE.sub("", ext).lower()
+    return f"{name}.{ext}" if ext else name
+
+
+def _validate_file_type(filename: str, content: bytes) -> str:
+    """Validate that an uploaded file is genuinely a PDF or DOCX.
+
+    Returns the validated extension on success.
+    Raises ValueError with a user-friendly message on failure.
+    """
+    # --- Extension checks ---
+    if "." not in filename:
+        raise ValueError("Filename has no extension. Only .pdf and .docx files are accepted.")
+
+    ext = filename.rsplit(".", 1)[-1].lower()
+
+    # Reject double-extension tricks like "resume.pdf.exe"
+    parts = filename.rsplit(".", 2)
+    if len(parts) > 2:
+        # More than one dot — verify ALL extensions are the same valid type
+        exts = [p.lower() for p in parts[1:]]
+        if not all(e in ("pdf", "docx") for e in exts):
+            raise ValueError(
+                f"Suspicious filename '{filename}'. Multiple or mismatched extensions are not allowed."
+            )
+
+    if ext not in ("pdf", "docx"):
+        raise ValueError(
+            f"Unsupported file type '.{ext}'. Only PDF and DOCX files are accepted."
+        )
+
+    # --- Magic-byte verification ---
+    signatures = _MAGIC_SIGNATURES.get(ext, [])
+    if not any(content[:len(sig)] == sig for sig in signatures):
+        raise ValueError(
+            f"File content does not match the '.{ext}' extension. "
+            "The file may be corrupted or disguised. Only genuine PDF and DOCX files are accepted."
+        )
+
+    return ext
+
+
+def _validate_file_size(content: bytes, filename: str) -> float:
+    """Validate the file size is within the allowed limit. Returns size in MB."""
+    size_mb = len(content) / (1024 * 1024)
+    if size_mb > settings.max_upload_size_mb:
+        raise ValueError(
+            f"File '{filename}' is too large ({size_mb:.1f}MB). "
+            f"Maximum allowed size is {settings.max_upload_size_mb}MB."
+        )
+    return size_mb
 
 # In-memory store for guest (unauthenticated) analyses — volatile
 _guest_store: dict[str, AnalysisRecord] = {}
@@ -51,27 +140,23 @@ async def upload_and_analyze(
     - Authenticated users: analysis is persisted to Firestore.
     - Guests: analysis is returned but stored only in-memory (lost on server restart).
     """
-    # Validate file type
+    # --- Security validation layer ------------------------------------------------
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided.")
 
-    ext = file.filename.lower().split(".")[-1] if "." in file.filename else ""
-    if ext not in ("pdf", "docx"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported file type '.{ext}'. Only PDF and DOCX files are accepted.",
-        )
+    try:
+        safe_name = _sanitize_filename(file.filename)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    # Validate file size
     content = await file.read()
     await file.seek(0)
 
-    size_mb = len(content) / (1024 * 1024)
-    if size_mb > settings.max_upload_size_mb:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large ({size_mb:.1f}MB). Maximum size is {settings.max_upload_size_mb}MB.",
-        )
+    try:
+        ext = _validate_file_type(safe_name, content)
+        size_mb = _validate_file_size(content, safe_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     try:
         # Extract text
@@ -143,25 +228,23 @@ async def _process_single_file(
     """Process one resume file inside a batch. Returns a BatchItemResult."""
     filename = file.filename or "unknown"
     try:
+        # --- Security validation layer ----------------------------------------
         if not file.filename:
             return BatchItemResult(filename=filename, success=False, error="No filename provided.")
 
-        ext = file.filename.lower().split(".")[-1] if "." in file.filename else ""
-        if ext not in ("pdf", "docx"):
-            return BatchItemResult(
-                filename=filename, success=False,
-                error=f"Unsupported file type '.{ext}'. Only PDF and DOCX are accepted.",
-            )
+        try:
+            safe_name = _sanitize_filename(file.filename)
+        except ValueError as e:
+            return BatchItemResult(filename=filename, success=False, error=str(e))
 
         content = await file.read()
         await file.seek(0)
 
-        size_mb = len(content) / (1024 * 1024)
-        if size_mb > settings.max_upload_size_mb:
-            return BatchItemResult(
-                filename=filename, success=False,
-                error=f"File too large ({size_mb:.1f}MB). Max is {settings.max_upload_size_mb}MB.",
-            )
+        try:
+            ext = _validate_file_type(safe_name, content)
+            size_mb = _validate_file_size(content, safe_name)
+        except ValueError as e:
+            return BatchItemResult(filename=filename, success=False, error=str(e))
 
         resume_text = await extract_text(file)
         if not resume_text.strip():
