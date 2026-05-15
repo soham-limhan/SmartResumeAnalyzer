@@ -1,8 +1,8 @@
 """Pydantic schemas for request/response models."""
 
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import Optional, Union
+from pydantic import BaseModel, Field, field_validator
 import uuid
 
 
@@ -20,6 +20,27 @@ class KeywordAnalysis(BaseModel):
     keyword: str
     count: int
     relevance: str = Field(description="high, medium, or low relevance")
+
+    @field_validator("relevance", mode="before")
+    @classmethod
+    def coerce_relevance(cls, v):
+        """Coerce float/int relevance values from LLM to string categories.
+
+        The Groq LLM sometimes returns numeric relevance (0.0–1.0) instead of
+        the expected string values ("high", "medium", "low"). This validator
+        normalises both cases so Pydantic never rejects valid AI output.
+        """
+        if isinstance(v, (int, float)):
+            if v >= 0.7:
+                return "high"
+            elif v >= 0.4:
+                return "medium"
+            else:
+                return "low"
+        if isinstance(v, str):
+            # Normalise to lowercase; accept any string the model sends
+            return v.lower().strip()
+        return str(v)
 
 
 class ResumeAnalysis(BaseModel):
@@ -61,6 +82,24 @@ class UploadResponse(BaseModel):
     filename: str
     analysis: ResumeAnalysis
     uploaded_at: datetime
+
+
+class BatchItemResult(BaseModel):
+    """Result for a single file within a batch upload."""
+    filename: str
+    success: bool
+    id: Optional[str] = None
+    analysis: Optional[ResumeAnalysis] = None
+    uploaded_at: Optional[datetime] = None
+    error: Optional[str] = None
+
+
+class BatchUploadResponse(BaseModel):
+    """Response for a batch resume upload."""
+    total: int
+    successful: int
+    failed: int
+    results: list[BatchItemResult]
 
 
 class HistoryListResponse(BaseModel):

@@ -3,18 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Upload, FileText, X, Sparkles, Loader2, CheckCircle2, AlertCircle, FileUp, Clock, Timer
+  Upload, FileText, X, Sparkles, Loader2, CheckCircle2, AlertCircle,
+  FileUp, Clock, Timer, Files, Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import GlassCard from '@/components/shared/GlassCard';
-import { uploadResume } from '@/lib/api';
+import { uploadResume, uploadBatchResumes } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
-// Estimated analysis time in seconds (adjust based on your Ollama model speed)
-const ESTIMATED_ANALYSIS_SECONDS = 45;
+// Estimated analysis time per resume in seconds
+const ESTIMATED_PER_RESUME_SECONDS = 30;
+const MAX_FILES = 25;
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -22,10 +24,16 @@ function formatTime(seconds) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+function formatSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function UploadPage() {
   const navigate = useNavigate();
-  const { user, addGuestAnalysis } = useAuth();
-  const [file, setFile] = useState(null);
+  const { user, addGuestAnalysis, saveBatchResults } = useAuth();
+  const [files, setFiles] = useState([]);
   const [jobDescription, setJobDescription] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -33,6 +41,8 @@ export default function UploadPage() {
   const [stage, setStage] = useState('idle'); // idle, uploading, analyzing, done, error
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef(null);
+
+  const estimatedTotalSeconds = Math.ceil(files.length / 3) * ESTIMATED_PER_RESUME_SECONDS;
 
   // ETA timer — starts when stage enters 'analyzing', stops on 'done' or 'error'
   useEffect(() => {
@@ -55,17 +65,26 @@ export default function UploadPage() {
     };
   }, [stage]);
 
-  const etaRemaining = Math.max(0, ESTIMATED_ANALYSIS_SECONDS - elapsed);
-  const etaProgress = Math.min(100, (elapsed / ESTIMATED_ANALYSIS_SECONDS) * 100);
+  const etaRemaining = Math.max(0, estimatedTotalSeconds - elapsed);
+  const etaProgress = estimatedTotalSeconds > 0
+    ? Math.min(100, (elapsed / estimatedTotalSeconds) * 100)
+    : 0;
 
   const onDrop = useCallback((accepted, rejected) => {
     setError(null);
     if (rejected.length) {
-      setError('Invalid file. Only PDF and DOCX files under 10MB are accepted.');
-      return;
+      const reasons = rejected.map(r => r.errors.map(e => e.message).join(', ')).join('; ');
+      setError(`Some files were rejected: ${reasons}`);
     }
     if (accepted.length) {
-      setFile(accepted[0]);
+      setFiles((prev) => {
+        const combined = [...prev, ...accepted];
+        if (combined.length > MAX_FILES) {
+          setError(`Maximum ${MAX_FILES} files allowed. ${combined.length - MAX_FILES} files were dropped.`);
+          return combined.slice(0, MAX_FILES);
+        }
+        return combined;
+      });
     }
   }, []);
 
@@ -76,41 +95,67 @@ export default function UploadPage() {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     },
     maxSize: 10 * 1024 * 1024,
-    maxFiles: 1,
-    multiple: false,
+    maxFiles: MAX_FILES,
+    multiple: true,
   });
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (files.length === 0) return;
     setUploading(true);
     setError(null);
     setStage('uploading');
     setProgress(0);
 
     try {
-      // Simulate upload progress then switch to analyzing
       const onProgress = (pct) => {
         setProgress(pct);
         if (pct >= 100) setStage('analyzing');
       };
 
-      const result = await uploadResume(file, jobDescription || null, onProgress);
-      setStage('done');
+      if (files.length === 1) {
+        // Single file — use original endpoint
+        const result = await uploadResume(files[0], jobDescription || null, onProgress);
+        setStage('done');
 
-      // Navigate to results after brief success state
-      // Store guest analysis in context (volatile)
-      if (!user && result) {
-        addGuestAnalysis({
-          id: result.id,
-          filename: result.filename || file.name,
-          uploaded_at: result.uploaded_at || new Date().toISOString(),
-          analysis: result.analysis,
+        if (!user && result) {
+          addGuestAnalysis({
+            id: result.id,
+            filename: result.filename || files[0].name,
+            uploaded_at: result.uploaded_at || new Date().toISOString(),
+            analysis: result.analysis,
+          });
+        }
+
+        setTimeout(() => {
+          navigate(`/analysis/${result.id}`, { state: { analysis: result } });
+        }, 800);
+      } else {
+        // Batch upload
+        const result = await uploadBatchResumes(files, jobDescription || null, onProgress);
+        setStage('done');
+
+        // Store guest analyses
+        if (!user && result.results) {
+          result.results.filter(r => r.success).forEach((r) => {
+            addGuestAnalysis({
+              id: r.id,
+              filename: r.filename,
+              uploaded_at: r.uploaded_at || new Date().toISOString(),
+              analysis: r.analysis,
+            });
+          });
+        }
+
+        // Save batch results and navigate to batch results page
+        saveBatchResults({
+          ...result,
+          job_description: jobDescription || null,
         });
-      }
 
-      setTimeout(() => {
-        navigate(`/analysis/${result.id}`, { state: { analysis: result } });
-      }, 800);
+        setTimeout(() => {
+          navigate('/batch-results');
+        }, 800);
+      }
     } catch (err) {
       setStage('error');
       setError(err.response?.data?.detail || err.message || 'Analysis failed. Please try again.');
@@ -118,17 +163,18 @@ export default function UploadPage() {
     }
   };
 
-  const removeFile = () => {
-    setFile(null);
+  const removeFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setError(null);
+  };
+
+  const clearAllFiles = () => {
+    setFiles([]);
     setError(null);
     setStage('idle');
   };
 
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+  const totalSize = files.reduce((acc, f) => acc + f.size, 0);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -141,61 +187,106 @@ export default function UploadPage() {
               ? 'border-primary bg-primary/5 scale-[1.01]'
               : 'border-border/50 hover:border-primary/50 hover:bg-muted/30'
             }
-            ${file ? 'border-primary/30' : ''}`}
+            ${files.length > 0 ? 'border-primary/30' : ''}`}
         >
           <input {...getInputProps()} id="resume-upload" />
 
-          <AnimatePresence mode="wait">
-            {!file ? (
-              <motion.div
-                key="dropzone"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-4"
-              >
-                <motion.div
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center"
-                  animate={{ y: isDragActive ? -8 : 0 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  <FileUp className="w-8 h-8 text-primary" />
-                </motion.div>
-                <div>
-                  <p className="text-base font-medium mb-1">
-                    {isDragActive ? 'Drop your resume here' : 'Drag & drop your resume'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    or click to browse • PDF, DOCX up to 10MB
-                  </p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="file-preview"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex items-center gap-4"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-medium truncate">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">{formatSize(file.size)}</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); removeFile(); }}
-                  className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            className="flex flex-col items-center gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.div
+              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center"
+              animate={{ y: isDragActive ? -8 : 0 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <FileUp className="w-8 h-8 text-primary" />
+            </motion.div>
+            <div>
+              <p className="text-base font-medium mb-1">
+                {isDragActive ? 'Drop your resumes here' : 'Drag & drop resumes'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                or click to browse • PDF, DOCX up to 10MB each • Up to {MAX_FILES} files
+              </p>
+            </div>
+          </motion.div>
         </div>
       </GlassCard>
+
+      {/* Selected Files List */}
+      <AnimatePresence>
+        {files.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <GlassCard hover={false}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Files className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-semibold font-heading">
+                    {files.length} {files.length === 1 ? 'Resume' : 'Resumes'} Selected
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    ({formatSize(totalSize)} total)
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFiles}
+                  disabled={uploading}
+                  className="text-xs text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                  Clear All
+                </Button>
+              </div>
+
+              <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
+                {files.map((file, idx) => (
+                  <motion.div
+                    key={`${file.name}-${idx}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ delay: idx * 0.03 }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{file.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatSize(file.size)}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground/60 font-mono w-5 text-right flex-shrink-0">
+                      #{idx + 1}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                      disabled={uploading}
+                      className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+
+              {files.length >= MAX_FILES && (
+                <p className="text-xs text-amber-400 mt-2 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Maximum file limit reached ({MAX_FILES})
+                </p>
+              )}
+            </GlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Job Description (optional) */}
       <GlassCard hover={false}>
@@ -204,12 +295,18 @@ export default function UploadPage() {
         </Label>
         <Textarea
           id="job-desc"
-          placeholder="Paste the job description here to get a match score and targeted suggestions..."
+          placeholder="Paste the job description here to get a match score and targeted suggestions for each resume..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           className="min-h-[120px] bg-background/50 resize-none"
           disabled={uploading}
         />
+        {jobDescription.trim() && (
+          <p className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3" />
+            Job description will be used to calculate match scores for {files.length === 1 ? 'this resume' : `all ${files.length} resumes`}
+          </p>
+        )}
       </GlassCard>
 
       {/* Error */}
@@ -250,13 +347,14 @@ export default function UploadPage() {
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    {stage === 'uploading' && 'Uploading resume...'}
-                    {stage === 'analyzing' && 'AI is analyzing your resume...'}
+                    {stage === 'uploading' && `Uploading ${files.length} ${files.length === 1 ? 'resume' : 'resumes'}...`}
+                    {stage === 'analyzing' && `AI is analyzing ${files.length} ${files.length === 1 ? 'resume' : 'resumes'}...`}
                     {stage === 'done' && 'Analysis complete!'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {stage === 'uploading' && 'Preparing file for analysis'}
-                    {stage === 'done' && 'Redirecting to results...'}
+                    {stage === 'uploading' && 'Preparing files for analysis'}
+                    {stage === 'analyzing' && `Processing ${Math.min(3, files.length)} at a time`}
+                    {stage === 'done' && (files.length > 1 ? 'Redirecting to batch results...' : 'Redirecting to results...')}
                   </p>
                 </div>
 
@@ -307,7 +405,7 @@ export default function UploadPage() {
                     />
                   </div>
                   <p className="text-[11px] text-muted-foreground/70 text-center">
-                    Ollama is processing your resume with AI • Estimated time: ~{formatTime(ESTIMATED_ANALYSIS_SECONDS)}
+                    AI is processing {files.length} {files.length === 1 ? 'resume' : 'resumes'} • Estimated: ~{formatTime(estimatedTotalSeconds)}
                   </p>
                 </motion.div>
               )}
@@ -324,18 +422,21 @@ export default function UploadPage() {
       <Button
         size="lg"
         onClick={handleAnalyze}
-        disabled={!file || uploading}
+        disabled={files.length === 0 || uploading}
         className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 py-6 text-base rounded-xl glow-purple disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {uploading ? (
           <>
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Processing...
+            Processing {files.length} {files.length === 1 ? 'Resume' : 'Resumes'}...
           </>
         ) : (
           <>
             <Sparkles className="w-5 h-5 mr-2" />
-            Analyze Resume
+            {files.length <= 1
+              ? 'Analyze Resume'
+              : `Analyze ${files.length} Resumes`
+            }
           </>
         )}
       </Button>

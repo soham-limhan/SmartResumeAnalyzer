@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [guestAnalyses, setGuestAnalyses] = useState([]);
+  const [batchResults, setBatchResults] = useState(null);
 
   // Listen for auth state changes
   useEffect(() => {
@@ -85,6 +86,7 @@ export function AuthProvider({ children }) {
     await signOut(auth);
     setUser(null);
     setGuestAnalyses([]);
+    setBatchResults(null);
   };
 
   // Guest analysis management (in-memory only)
@@ -94,6 +96,15 @@ export function AuthProvider({ children }) {
 
   const clearGuestAnalyses = () => {
     setGuestAnalyses([]);
+  };
+
+  // Batch results management
+  const saveBatchResults = (results) => {
+    setBatchResults(results);
+  };
+
+  const clearBatchResults = () => {
+    setBatchResults(null);
   };
 
   const value = {
@@ -107,6 +118,9 @@ export function AuthProvider({ children }) {
     guestAnalyses,
     addGuestAnalysis,
     clearGuestAnalyses,
+    batchResults,
+    saveBatchResults,
+    clearBatchResults,
   };
 
   return (

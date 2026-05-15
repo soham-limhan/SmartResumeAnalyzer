@@ -10,6 +10,7 @@ import {
   LogOut,
   LogIn,
   User,
+  ClipboardList,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -18,10 +19,11 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, batchResults } = useAuth();
 
   const navItems = [
     { to: '/dashboard', icon: Upload, label: 'Upload' },
+    ...(batchResults ? [{ to: '/batch-results', icon: ClipboardList, label: 'Batch Results' }] : []),
     { to: '/history', icon: History, label: 'History' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];

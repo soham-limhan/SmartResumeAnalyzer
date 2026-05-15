@@ -3,7 +3,7 @@ import { auth } from '@/lib/firebase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 120000, // 2 min for AI analysis
+  timeout: 300000, // 5 min for batch AI analysis
   headers: {
     'Accept': 'application/json',
   },
@@ -23,7 +23,7 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Upload resume and get analysis
+// Upload single resume and get analysis
 export async function uploadResume(file, jobDescription = null, onProgress = null) {
   const formData = new FormData();
   formData.append('file', file);
@@ -32,6 +32,25 @@ export async function uploadResume(file, jobDescription = null, onProgress = nul
   }
 
   const response = await api.post('/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: onProgress
+      ? (e) => onProgress(Math.round((e.loaded * 100) / (e.total || 1)))
+      : undefined,
+  });
+  return response.data;
+}
+
+// Batch upload up to 25 resumes
+export async function uploadBatchResumes(files, jobDescription = null, onProgress = null) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  if (jobDescription) {
+    formData.append('job_description', jobDescription);
+  }
+
+  const response = await api.post('/batch-upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: onProgress
       ? (e) => onProgress(Math.round((e.loaded * 100) / (e.total || 1)))

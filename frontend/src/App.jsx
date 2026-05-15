@@ -11,6 +11,7 @@ import PageTransition from '@/components/shared/PageTransition';
 import LandingPage from '@/pages/LandingPage';
 import UploadPage from '@/pages/UploadPage';
 import AnalysisPage from '@/pages/AnalysisPage';
+import BatchResultsPage from '@/pages/BatchResultsPage';
 import HistoryPage from '@/pages/HistoryPage';
 import SettingsPage from '@/pages/SettingsPage';
 import LoginPage from '@/pages/LoginPage';
@@ -49,6 +50,7 @@ function AnimatedRoutes() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UploadPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
+          <Route path="/batch-results" element={<BatchResultsPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
