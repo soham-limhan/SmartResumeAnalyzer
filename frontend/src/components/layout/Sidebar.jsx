@@ -64,7 +64,7 @@ export default function Sidebar() {
               className="overflow-hidden whitespace-nowrap"
             >
               <span className="font-heading font-bold text-base bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                SmartResume
+                ResumePilot
               </span>
               <p className="text-[10px] text-muted-foreground font-medium -mt-0.5">AI Resume Intelligence</p>
             </motion.div>

@@ -1,4 +1,4 @@
-"""Uvicorn runner for the SmartResume backend."""
+"""Uvicorn runner for the ResumePilot backend."""
 
 import uvicorn
 

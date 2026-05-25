@@ -54,7 +54,7 @@ async def export_analysis(
         return JSONResponse(
             content=record_dict,
             headers={
-                "Content-Disposition": f'attachment; filename="smartresume_report_{analysis_id[:8]}.json"',
+                "Content-Disposition": f'attachment; filename="resumepilot_report_{analysis_id[:8]}.json"',
             },
         )
     else:
@@ -62,6 +62,6 @@ async def export_analysis(
         return PlainTextResponse(
             content=content,
             headers={
-                "Content-Disposition": f'attachment; filename="smartresume_report_{analysis_id[:8]}.txt"',
+                "Content-Disposition": f'attachment; filename="resumepilot_report_{analysis_id[:8]}.txt"',
             },
         )

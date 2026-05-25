@@ -64,7 +64,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    print("[SHUTDOWN] SmartResume API shutting down...")
+    print("[SHUTDOWN] ResumePilot API shutting down...")
 
 
 app = FastAPI(

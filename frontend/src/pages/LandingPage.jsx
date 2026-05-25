@@ -25,12 +25,12 @@ const features = [
 ];
 
 const testimonials = [
-  { name: 'Priya Sharma', role: 'Software Engineer', company: 'Google', quote: 'SmartResume boosted my ATS score from 58 to 91. Got 4 interview calls within a week of updating my resume.', rating: 5, avatarColor: 'from-indigo-500 to-violet-600' },
+  { name: 'Priya Sharma', role: 'Software Engineer', company: 'Google', quote: 'ResumePilot boosted my ATS score from 58 to 91. Got 4 interview calls within a week of updating my resume.', rating: 5, avatarColor: 'from-indigo-500 to-violet-600' },
   { name: 'Marcus Chen', role: 'Product Manager', company: 'Stripe', quote: 'The keyword optimization alone was a game-changer. Clear, actionable, and incredibly fast. Worth every penny.', rating: 5, avatarColor: 'from-cyan-500 to-blue-600' },
   { name: 'Aisha Patel', role: 'Data Scientist', company: 'Meta', quote: 'As a fresher, I had no idea what ATS even was. This tool walked me through everything. Landed my first big-tech role!', rating: 5, avatarColor: 'from-violet-500 to-purple-600' },
   { name: 'Ryan O\'Brien', role: 'UX Designer', company: 'Figma', quote: 'The recruiter feedback section is uncanny — it felt like a real human reviewed my resume. Highly recommend.', rating: 5, avatarColor: 'from-emerald-500 to-teal-600' },
   { name: 'Sofia Martínez', role: 'Backend Engineer', company: 'Shopify', quote: 'Used it before every application. My interview rate went from 5% to 35%. The job match analysis is brilliant.', rating: 5, avatarColor: 'from-pink-500 to-rose-600' },
-  { name: 'James Park', role: 'ML Engineer', company: 'OpenAI', quote: 'Clean UI, fast analysis, and genuinely useful output. Other tools feel like toys after using SmartResume.', rating: 5, avatarColor: 'from-orange-500 to-amber-600' },
+  { name: 'James Park', role: 'ML Engineer', company: 'OpenAI', quote: 'Clean UI, fast analysis, and genuinely useful output. Other tools feel like toys after using ResumePilot.', rating: 5, avatarColor: 'from-orange-500 to-amber-600' },
 ];
 
 const pricingPlans = [
@@ -300,7 +300,7 @@ export default function LandingPage() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-heading font-bold text-base bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              SmartResume
+              ResumePilot
             </span>
           </button>
 
@@ -839,7 +839,7 @@ export default function LandingPage() {
               </h2>
 
               <p className="text-muted-foreground text-base max-w-lg mx-auto mb-10 leading-relaxed">
-                Join 50,000+ job seekers who use SmartResume to land interviews at top companies.
+                Join 50,000+ job seekers who use ResumePilot to land interviews at top companies.
                 Start for free in under 60 seconds.
               </p>
 
@@ -868,7 +868,7 @@ export default function LandingPage() {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="font-heading font-bold text-base bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                SmartResume
+                ResumePilot
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
@@ -900,7 +900,7 @@ export default function LandingPage() {
         </div>
 
         <div className="border-t border-white/6 max-w-7xl mx-auto px-5 md:px-10 py-5 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">© 2026 SmartResume. Built with AI ♥</p>
+          <p className="text-xs text-muted-foreground">© 2026 ResumePilot. Built with AI ♥</p>
           <p className="text-xs text-muted-foreground">Powered by Llama 3 · FastAPI · React</p>
         </div>
       </footer>
