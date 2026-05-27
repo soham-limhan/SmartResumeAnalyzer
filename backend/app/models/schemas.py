@@ -220,3 +220,40 @@ class EnhanceResponse(BaseModel):
     mode: str
     enhanced_resume: EnhancedResume
     enhanced_at: datetime
+
+
+# ─── Social Media Links Integration Schemas ─────────────────────────────────────
+
+class SocialLinkItem(BaseModel):
+    """Metadata for a single social profile link."""
+    id: str
+    platform: str  # linkedin, github, portfolio, twitter, leetcode, hackerrank, kaggle, behance, dribbble, medium, stackoverflow, youtube, instagram, custom
+    url: str
+    label: Optional[str] = None
+    is_enabled: bool = True
+    order: int = 0
+    is_verified: bool = True
+
+
+class SocialLinksProfile(BaseModel):
+    """Stored social media links and integration settings for a user."""
+    user_id: Optional[str] = None
+    display_mode: str = "compact"  # compact, expanded, icon_only, ats_safe
+    links: list[SocialLinkItem] = []
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class AIRecommendRequest(BaseModel):
+    """Request schema for AI social links recommendation."""
+    current_links: list[SocialLinkItem] = []
+    target_role: Optional[str] = None
+    job_description: Optional[str] = None
+
+
+class AIRecommendResponse(BaseModel):
+    """Structured response for AI social links evaluation."""
+    completeness_score: int = Field(ge=0, le=100)
+    missing_platforms: list[str] = []
+    suggestions: list[str] = []
+    priority_list: list[str] = []
+

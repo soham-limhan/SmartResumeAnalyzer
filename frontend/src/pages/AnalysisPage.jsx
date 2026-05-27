@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Download, Brain, CheckCircle2, XCircle, Lightbulb,
   MessageSquare, HelpCircle, Target, TrendingUp, Briefcase, Sparkles, Loader2,
-  BarChart3 as BarChartIcon, Star, Zap, FileText, Wand2,
+  BarChart3 as BarChartIcon, Star, Zap, FileText, Wand2, AlertTriangle,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer, Cell, RadarChart,
@@ -55,6 +55,19 @@ export default function AnalysisPage() {
   const [data, setData] = useState(location.state?.analysis || null);
   const [loading, setLoading] = useState(!data);
   const [exporting, setExporting] = useState(false);
+  const [activeSocialLinks, setActiveSocialLinks] = useState([]);
+
+  useEffect(() => {
+    const cached = localStorage.getItem('smartresume-social-links');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setActiveSocialLinks(parsed.filter(l => l.is_enabled && l.url));
+      } catch (e) {
+        // Ignore
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!data && id) {
@@ -384,6 +397,76 @@ export default function AnalysisPage() {
               </GlassCard>
             </motion.div>
           </div>
+
+          {/* AI Social Presence Audit Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-4"
+          >
+            <GlassCard hover={false} className="border-indigo-500/10 bg-gradient-to-br from-indigo-500/3 via-transparent to-violet-500/3 p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-sm text-foreground">AI Social Presence Audit</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Optimize your online visibility score for recruiters and hiring managers.</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate('/settings')}
+                  className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 text-xs py-1.5 h-auto px-4"
+                >
+                  Manage Connections
+                </Button>
+              </div>
+              
+              <div className="h-px bg-white/8 w-full my-4" />
+              
+              <div className="grid sm:grid-cols-12 gap-5 items-center">
+                {/* Active Badges List */}
+                <div className="sm:col-span-8 space-y-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Active Networks:</span>
+                    {activeSocialLinks.length > 0 ? (
+                      activeSocialLinks.map(l => (
+                        <Badge key={l.id} variant="secondary" className="text-[10px] gap-1.5 px-2.5 py-0.5 rounded-lg capitalize border-white/6 bg-white/5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          {l.platform}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-amber-400 font-semibold italic flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" /> No profiles linked yet. Connect your links to boost visibility!
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Including professional portfolios (e.g. GitHub, LeetCode, Behance) in your resume header establishes verified social proof of work. Connect your networks in settings to auto-calculate completeness against target industries!
+                  </p>
+                </div>
+                
+                {/* Completeness Score Card */}
+                <div className="sm:col-span-4 p-4 rounded-2xl bg-white/3 border border-white/6 flex items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-wider block">Completeness</span>
+                    <p className="text-2xl font-heading font-bold text-indigo-400 mt-0.5">
+                      {Math.min(100, activeSocialLinks.length * 25)}%
+                    </p>
+                  </div>
+                  <div className="flex-grow max-w-[120px] h-2.5 rounded-full bg-white/10 overflow-hidden relative">
+                    <div 
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min(100, activeSocialLinks.length * 25)}%` }} 
+                    />
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
         </TabsContent>
 
         {/* ── Skills ───────────────────────────────────────────── */}

@@ -103,9 +103,15 @@ export async function enhanceResume(analysisId, mode, jobDescription = null) {
 }
 
 // Download enhanced resume as DOCX
-export async function downloadEnhancedDocx(enhancementId, mode = 'professional') {
+export async function downloadEnhancedDocx(enhancementId, mode = 'professional', socialLinks = [], displayMode = 'compact') {
+  const socialLinksJson = socialLinks && socialLinks.length > 0 ? JSON.stringify(socialLinks) : undefined;
+  
   const response = await api.get(`/enhance/${enhancementId}/download/docx`, {
     responseType: 'blob',
+    params: {
+      social_links_json: socialLinksJson,
+      display_mode: displayMode
+    }
   });
   // Trigger browser download
   const url = window.URL.createObjectURL(new Blob([response.data]));

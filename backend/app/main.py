@@ -7,13 +7,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import upload, history, export, auth, enhance
+from app.routes import upload, history, export, auth, enhance, social
 from app.database import init_firebase
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan: startup and shutdown events."""
     # Startup
     os.makedirs(settings.upload_dir, exist_ok=True)
     print(f"[STARTUP] {settings.app_name} v{settings.app_version} starting...")
@@ -89,6 +88,8 @@ app.include_router(upload.router, prefix="/api", tags=["Upload & Analysis"])
 app.include_router(history.router, prefix="/api", tags=["History"])
 app.include_router(export.router, prefix="/api", tags=["Export"])
 app.include_router(enhance.router, prefix="/api", tags=["AI Enhancement"])
+app.include_router(social.router, prefix="/api", tags=["Social Links"])
+
 
 
 @app.get("/api/health", tags=["Health"])

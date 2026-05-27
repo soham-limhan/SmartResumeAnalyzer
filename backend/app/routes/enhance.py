@@ -139,6 +139,8 @@ async def enhance_resume_endpoint(
 )
 async def download_enhanced_docx(
     enhancement_id: str,
+    social_links_json: Optional[str] = None,
+    display_mode: str = "compact",
     user: Optional[dict] = Depends(get_current_user),
 ):
     """Stream a DOCX file of the AI-enhanced resume."""
@@ -155,8 +157,28 @@ async def download_enhanced_docx(
         if not record:
             raise HTTPException(status_code=404, detail="Enhancement not found.")
 
+    # Fetch social links for authenticated user or fallback to param
+    social_links = []
+    if user:
+        try:
+            db = get_db()
+            social_doc = db.collection("social_links").document(user["uid"]).get()
+            if social_doc.exists:
+                social_data = social_doc.to_dict()
+                social_links = social_data.get("links", [])
+                display_mode = social_data.get("display_mode", display_mode)
+        except Exception as e:
+            logger.warning(f"Failed to fetch social links from Firestore for DOCX: {e}")
+            
+    if not social_links and social_links_json:
+        try:
+            import json
+            social_links = json.loads(social_links_json)
+        except Exception as e:
+            logger.warning(f"Failed to parse social_links_json: {e}")
+
     try:
-        docx_bytes = _generate_docx(record.enhanced_resume)
+        docx_bytes = _generate_docx(record.enhanced_resume, social_links, display_mode)
     except Exception as e:
         logger.exception("DOCX generation failed")
         raise HTTPException(status_code=500, detail=f"DOCX generation failed: {e}")
@@ -171,7 +193,7 @@ async def download_enhanced_docx(
 
 # ─── DOCX Generation ─────────────────────────────────────────────────────────────
 
-def _generate_docx(enhanced: "EnhancedResume") -> bytes:
+def _generate_docx(enhanced: "EnhancedResume", social_links: list = None, display_mode: str = "compact") -> bytes:
     """Generate a styled DOCX from an EnhancedResume object."""
     from docx import Document
     from docx.shared import Pt, Inches, RGBColor
@@ -229,7 +251,68 @@ def _generate_docx(enhanced: "EnhancedResume") -> bytes:
             run.font.size = Pt(9.5)
             run.font.color.rgb = RGBColor(107, 114, 128)
 
+    # ── Social Links ──
+    active_social = [l for l in (social_links or []) if l.get("is_enabled", True)]
+    if active_social:
+        import docx.opc.constants
+        
+        social_para = doc.add_paragraph()
+        social_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        social_para.paragraph_format.space_before = Pt(2)
+        social_para.paragraph_format.space_after = Pt(2)
+        
+        def add_docx_hyperlink(paragraph, url, text):
+            part = paragraph.part
+            r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+            hyperlink = OxmlElement('w:hyperlink')
+            hyperlink.set(qn('r:id'), r_id)
+            new_run = OxmlElement('w:r')
+            rPr = OxmlElement('w:rPr')
+            
+            c = OxmlElement('w:color')
+            c.set(qn('w:val'), '4F46E5')
+            rPr.append(c)
+            
+            u = OxmlElement('w:underline')
+            u.set(qn('w:val'), 'single')
+            rPr.append(u)
+            
+            sz = OxmlElement('w:sz')
+            sz.set(qn('w:val'), '19')
+            rPr.append(sz)
+            
+            new_run.append(rPr)
+            text_node = OxmlElement('w:t')
+            text_node.text = text
+            new_run.append(text_node)
+            hyperlink.append(new_run)
+            paragraph._p.append(hyperlink)
+            return hyperlink
+
+        for idx, item in enumerate(active_social):
+            platform_name = item.get("platform", "custom").capitalize()
+            clean_url = item.get("url", "").replace("https://", "").replace("http://", "").replace("www.", "")
+            
+            if display_mode == "ats_safe":
+                label_text = clean_url
+            elif display_mode == "icon_only":
+                label_text = f"[{platform_name}]"
+            else:
+                label = item.get("label") or platform_name
+                label_text = f"{label} ({clean_url})" if display_mode == "expanded" else label
+                
+            add_docx_hyperlink(social_para, item.get("url", ""), label_text)
+            
+            if idx < len(active_social) - 1:
+                sep_run = social_para.add_run("  ·  ")
+                sep_run.font.size = Pt(9.5)
+                sep_run.font.color.rgb = RGBColor(156, 163, 175)
+
     doc.add_paragraph()  # spacer
+
+
+
+
 
     # ── Professional Summary ──
     summary = enhanced.professional_summary

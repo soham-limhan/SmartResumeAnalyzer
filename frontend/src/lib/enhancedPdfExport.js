@@ -28,6 +28,23 @@ const FONT_SIZES = {
   footer:     8,
 };
 
+const PLATFORM_META = {
+  linkedin: { label: 'LinkedIn', initial: 'LI', color: [0, 119, 181] },
+  github: { label: 'GitHub', initial: 'GH', color: [33, 37, 41] },
+  portfolio: { label: 'Portfolio', initial: 'PT', color: [79, 70, 229] },
+  twitter: { label: 'Twitter/X', initial: 'X', color: [29, 161, 242] },
+  leetcode: { label: 'LeetCode', initial: 'LC', color: [239, 143, 23] },
+  hackerrank: { label: 'HackerRank', initial: 'HR', color: [46, 200, 102] },
+  kaggle: { label: 'Kaggle', initial: 'KG', color: [32, 190, 255] },
+  behance: { label: 'Behance', initial: 'BH', color: [0, 87, 255] },
+  dribbble: { label: 'Dribbble', initial: 'DR', color: [234, 76, 137] },
+  medium: { label: 'Medium', initial: 'MD', color: [0, 171, 108] },
+  stackoverflow: { label: 'StackOverflow', initial: 'SO', color: [244, 128, 36] },
+  youtube: { label: 'YouTube', initial: 'YT', color: [255, 0, 0] },
+  instagram: { label: 'Instagram', initial: 'IG', color: [225, 48, 108] },
+  custom: { label: 'Link', initial: 'LN', color: [107, 114, 128] },
+};
+
 const PAGE_W  = 210; // A4 mm
 const PAGE_H  = 297;
 const MARGIN  = 18;
@@ -89,7 +106,7 @@ function checkPageBreak(doc, y, needed = 20) {
 
 // ─── Main export function ──────────────────────────────────────────────────────
 
-export function generateEnhancedPDF(enhancedResume, filename = 'enhanced_resume.pdf') {
+export function generateEnhancedPDF(enhancedResume, filename = 'enhanced_resume.pdf', socialLinks = [], displayMode = 'compact') {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   // Register font fallback
@@ -97,14 +114,22 @@ export function generateEnhancedPDF(enhancedResume, filename = 'enhanced_resume.
 
   let y = 0;
 
+  // Filter out disabled social links
+  const activeLinks = (socialLinks || []).filter(l => l.is_enabled);
+  const hasLinks = activeLinks.length > 0;
+  
+  // Calculate dynamic header height based on presence of social links
+  const isAts = displayMode === 'ats_safe';
+  const headerHeight = hasLinks && !isAts ? 49 : 39;
+
   // ── Header Band ──────────────────────────────────────────────────────────────
   // Gradient-like header background
   setColor(doc, COLORS.primary, 'fill');
-  doc.rect(0, 0, PAGE_W, 42, 'F');
+  doc.rect(0, 0, PAGE_W, headerHeight, 'F');
 
   // Secondary accent stripe
   setColor(doc, COLORS.secondary, 'fill');
-  doc.rect(0, 38, PAGE_W, 4, 'F');
+  doc.rect(0, headerHeight - 4, PAGE_W, 4, 'F');
 
   // Name
   const name = enhancedResume.candidate_name || 'Candidate';
@@ -112,18 +137,166 @@ export function generateEnhancedPDF(enhancedResume, filename = 'enhanced_resume.
   doc.setFontSize(FONT_SIZES.name);
   doc.setFont('helvetica', 'bold');
   const nameW = doc.getTextWidth(name);
-  doc.text(name, (PAGE_W - nameW) / 2, 18);
+  doc.text(name, (PAGE_W - nameW) / 2, 16);
 
   // Contact info
+  let nextY = 24;
   if (enhancedResume.contact_info) {
     setColor(doc, [199, 210, 254], 'text'); // indigo-200
     doc.setFontSize(FONT_SIZES.contact);
     doc.setFont('helvetica', 'normal');
     const contactLines = wrapText(doc, enhancedResume.contact_info, COL_W);
-    doc.text(contactLines, PAGE_W / 2, 27, { align: 'center' });
+    doc.text(contactLines, PAGE_W / 2, nextY, { align: 'center' });
+    nextY += contactLines.length * 4.2;
   }
 
-  y = 52; // after header
+  // Draw Social Links inside header band if not ATS mode
+  if (hasLinks) {
+    if (displayMode === 'compact') {
+      let itemsText = [];
+      activeLinks.forEach(l => {
+        const meta = PLATFORM_META[l.platform] || PLATFORM_META.custom;
+        const label = l.label || meta.label;
+        const cleanUrl = l.url.replace(/^https?:\/\/(www\.)?/, '');
+        itemsText.push({ text: `${label}: ${cleanUrl}`, url: l.url, platform: l.platform });
+      });
+
+      let totalW = 0;
+      itemsText.forEach((item, idx) => {
+        totalW += doc.getTextWidth(item.text) + 6.5;
+        if (idx < itemsText.length - 1) {
+          totalW += doc.getTextWidth('  |  ');
+        }
+      });
+
+      let startX = (PAGE_W - totalW) / 2;
+      itemsText.forEach((item, idx) => {
+        const meta = PLATFORM_META[item.platform] || PLATFORM_META.custom;
+        
+        // Draw small colored circular badge
+        setColor(doc, meta.color, 'fill');
+        doc.circle(startX + 1.8, nextY - 0.8, 1.8, 'F');
+        setColor(doc, [255, 255, 255], 'text');
+        doc.setFontSize(5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(meta.initial, startX + 1.8, nextY - 0.1, { align: 'center' });
+        
+        // Draw text link
+        setColor(doc, [255, 255, 255], 'text');
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item.text, startX + 4.5, nextY + 0.5);
+        
+        // Hyperlink bounding box
+        const textW = doc.getTextWidth(item.text);
+        doc.link(startX, nextY - 2.5, textW + 5, 4, { url: item.url });
+        
+        startX += textW + 6.5;
+        
+        if (idx < itemsText.length - 1) {
+          setColor(doc, [199, 210, 254], 'text');
+          doc.text('  |  ', startX, nextY + 0.5);
+          startX += doc.getTextWidth('  |  ');
+        }
+      });
+    } else if (displayMode === 'expanded') {
+      const pillW = (COL_W - 8) / 2;
+      activeLinks.slice(0, 4).forEach((l, idx) => {
+        const meta = PLATFORM_META[l.platform] || PLATFORM_META.custom;
+        const label = l.label || meta.label;
+        const cleanUrl = l.url.replace(/^https?:\/\/(www\.)?/, '');
+        const displayVal = `${label}: ${cleanUrl}`;
+        
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        
+        const x = MARGIN + col * (pillW + 8);
+        const y = nextY + row * 5;
+        
+        // Draw semi-transparent background card
+        setColor(doc, [255, 255, 255], 'fill');
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y - 2.8, pillW, 4.2, 1, 1, 'F');
+        
+        // Circular icon indicator
+        setColor(doc, meta.color, 'fill');
+        doc.circle(x + 3.2, y - 0.7, 1.6, 'F');
+        setColor(doc, [255, 255, 255], 'text');
+        doc.setFontSize(4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(meta.initial, x + 3.2, y - 0.1, { align: 'center' });
+        
+        // Link text
+        setColor(doc, [255, 255, 255], 'text');
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        
+        let truncated = displayVal;
+        if (doc.getTextWidth(truncated) > pillW - 7) {
+          truncated = truncated.slice(0, 28) + '...';
+        }
+        doc.text(truncated, x + 5.8, y + 0.3);
+        
+        // Bounding link
+        doc.link(x, y - 2.8, pillW, 4.2, { url: l.url });
+      });
+    } else if (displayMode === 'icon_only') {
+      const iconR = 2.4;
+      const iconSpacing = 8;
+      const totalIconW = activeLinks.length * (iconR * 2) + (activeLinks.length - 1) * iconSpacing;
+      let iconX = (PAGE_W - totalIconW) / 2 + iconR;
+
+      activeLinks.forEach(l => {
+        const meta = PLATFORM_META[l.platform] || PLATFORM_META.custom;
+        
+        setColor(doc, meta.color, 'fill');
+        doc.circle(iconX, nextY + 0.5, iconR, 'F');
+        
+        setColor(doc, [255, 255, 255], 'text');
+        doc.setFontSize(5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(meta.initial, iconX, nextY + 1.2, { align: 'center' });
+        
+        doc.link(iconX - iconR, nextY - iconR + 0.5, iconR * 2, iconR * 2, { url: l.url });
+        
+        iconX += iconR * 2 + iconSpacing;
+      });
+    } else if (displayMode === 'ats_safe') {
+      let totalW = 0;
+      const textLinks = activeLinks.map(l => {
+        const clean = l.url.replace(/^https?:\/\/(www\.)?/, '');
+        return { text: clean, url: l.url };
+      });
+      
+      textLinks.forEach((item, idx) => {
+        totalW += doc.getTextWidth(item.text);
+        if (idx < textLinks.length - 1) {
+          totalW += doc.getTextWidth('  ·  ');
+        }
+      });
+      
+      let startX = (PAGE_W - totalW) / 2;
+      textLinks.forEach((item, idx) => {
+        setColor(doc, [226, 232, 240], 'text'); // slate-200
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item.text, startX, nextY + 0.5);
+        
+        const w = doc.getTextWidth(item.text);
+        doc.link(startX, nextY - 2.5, w, 4, { url: item.url });
+        
+        startX += w;
+        if (idx < textLinks.length - 1) {
+          setColor(doc, [199, 210, 254], 'text');
+          doc.text('  ·  ', startX, nextY + 0.5);
+          startX += doc.getTextWidth('  ·  ');
+        }
+      });
+    }
+  }
+
+  y = headerHeight + 10; // offset for the main body
+
 
   // ── Professional Summary ─────────────────────────────────────────────────────
   const summary = enhancedResume.professional_summary?.enhanced;
