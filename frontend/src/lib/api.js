@@ -92,4 +92,30 @@ export async function checkHealth() {
   return response.data;
 }
 
+// Enhance resume with AI
+export async function enhanceResume(analysisId, mode, jobDescription = null) {
+  const response = await api.post('/enhance', {
+    analysis_id: analysisId,
+    mode,
+    job_description: jobDescription || null,
+  });
+  return response.data;
+}
+
+// Download enhanced resume as DOCX
+export async function downloadEnhancedDocx(enhancementId, mode = 'professional') {
+  const response = await api.get(`/enhance/${enhancementId}/download/docx`, {
+    responseType: 'blob',
+  });
+  // Trigger browser download
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `enhanced_resume_${mode}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 export default api;

@@ -17,6 +17,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import OnboardingPage from '@/pages/OnboardingPage';
+import EnhancePage from '@/pages/EnhancePage';
 
 function DashboardLayout() {
   return (
@@ -50,6 +51,7 @@ function AnimatedRoutes() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UploadPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
+          <Route path="/enhance/:id" element={<EnhancePage />} />
           <Route path="/batch-results" element={<BatchResultsPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

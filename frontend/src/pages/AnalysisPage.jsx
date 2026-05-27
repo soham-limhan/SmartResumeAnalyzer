@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Download, Brain, CheckCircle2, XCircle, Lightbulb,
   MessageSquare, HelpCircle, Target, TrendingUp, Briefcase, Sparkles, Loader2,
-  BarChart3 as BarChartIcon, Star, Zap, FileText,
+  BarChart3 as BarChartIcon, Star, Zap, FileText, Wand2,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer, Cell, RadarChart,
@@ -163,8 +163,21 @@ export default function AnalysisPage() {
             </p>
           </div>
 
-          {/* Export button */}
-          <div className="flex-shrink-0">
+          {/* Export + Enhance buttons */}
+          <div className="flex-shrink-0 flex flex-col sm:flex-row gap-2">
+            {/* Enhance with AI CTA */}
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                size="sm"
+                onClick={() => navigate(`/enhance/${id}`, { state: { analysis: data } })}
+                className="rounded-xl gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:from-indigo-600 hover:to-violet-700 font-semibold border-0"
+                id="enhance-resume-btn"
+              >
+                <Wand2 className="w-3.5 h-3.5" />
+                Enhance with AI
+              </Button>
+            </motion.div>
+
             <Button
               variant="outline"
               size="sm"

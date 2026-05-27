@@ -1,7 +1,7 @@
 """Pydantic schemas for request/response models."""
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional, Union, List
 from pydantic import BaseModel, Field, field_validator
 import uuid
 
@@ -119,3 +119,104 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     ollama: dict
+
+
+# ─── AI Enhancement Schemas ────────────────────────────────────────────────────
+
+class EnhancedExperienceSection(BaseModel):
+    """Before/after for a single work experience entry."""
+    company: str = ""
+    title: str = ""
+    duration: str = ""
+    original_bullets: List[str] = Field(default_factory=list)
+    enhanced_bullets: List[str] = Field(default_factory=list)
+    improvements: List[str] = Field(default_factory=list)
+
+
+class EnhancedEducationSection(BaseModel):
+    """Before/after for a single education entry."""
+    institution: str = ""
+    degree: str = ""
+    year: str = ""
+    original: str = ""
+    enhanced: str = ""
+    improvements: List[str] = Field(default_factory=list)
+
+
+class EnhancedProjectSection(BaseModel):
+    """Before/after for a single project entry."""
+    name: str = ""
+    original: str = ""
+    enhanced: str = ""
+    improvements: List[str] = Field(default_factory=list)
+
+
+class EnhancedSummarySection(BaseModel):
+    """Before/after for the professional summary."""
+    original: str = ""
+    enhanced: str = ""
+    improvements: List[str] = Field(default_factory=list)
+
+
+class EnhancedSkillsSection(BaseModel):
+    """Before/after for the skills section."""
+    original: List[str] = Field(default_factory=list)
+    enhanced: List[str] = Field(default_factory=list)
+    keywords_added: List[str] = Field(default_factory=list)
+
+
+class EnhancedAchievementsSection(BaseModel):
+    """Before/after for achievements/awards."""
+    original: List[str] = Field(default_factory=list)
+    enhanced: List[str] = Field(default_factory=list)
+
+
+class EnhancedResume(BaseModel):
+    """Complete AI-enhanced resume with before/after content per section."""
+    mode: str = Field(description="Enhancement mode used")
+    candidate_name: str = Field(default="")
+    contact_info: str = Field(default="")
+    original_ats_score: int = Field(ge=0, le=100, description="Estimated original ATS score")
+    estimated_new_ats_score: int = Field(ge=0, le=100, description="Estimated ATS score after enhancement")
+    professional_summary: EnhancedSummarySection = Field(default_factory=EnhancedSummarySection)
+    experience_sections: List[EnhancedExperienceSection] = Field(default_factory=list)
+    education_sections: List[EnhancedEducationSection] = Field(default_factory=list)
+    projects_sections: List[EnhancedProjectSection] = Field(default_factory=list)
+    skills_section: EnhancedSkillsSection = Field(default_factory=EnhancedSkillsSection)
+    achievements_section: EnhancedAchievementsSection = Field(default_factory=EnhancedAchievementsSection)
+    total_improvements: int = Field(default=0, description="Total number of improvements made")
+    action_verbs_added: int = Field(default=0)
+    keywords_added_count: int = Field(default=0)
+    enhancement_highlights: List[str] = Field(default_factory=list)
+
+
+class EnhancedResumeRecord(BaseModel):
+    """Stored enhancement record with metadata."""
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    analysis_id: str
+    mode: str
+    enhanced_at: datetime = Field(default_factory=datetime.now)
+    enhanced_resume: EnhancedResume
+    job_description: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+class EnhanceRequest(BaseModel):
+    """Request body for resume enhancement."""
+    analysis_id: str = Field(description="ID of the analysis record to enhance")
+    mode: str = Field(
+        description="Enhancement mode: professional, technical, executive, or fresher"
+    )
+    job_description: Optional[str] = Field(
+        default=None,
+        description="Optional job description for targeted enhancement"
+    )
+
+
+class EnhanceResponse(BaseModel):
+    """Response after successful AI enhancement."""
+    id: str
+    analysis_id: str
+    mode: str
+    enhanced_resume: EnhancedResume
+    enhanced_at: datetime
