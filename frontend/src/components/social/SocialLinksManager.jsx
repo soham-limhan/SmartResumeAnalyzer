@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Globe, Link, Trash2, Plus, GripVertical, CheckCircle2, AlertCircle, Eye, EyeOff,
-  Sparkles, Code, Trophy, BarChart3, HelpCircle, Loader2, RefreshCw, ChevronUp, ChevronDown, Check
+  Sparkles, Code, Trophy, BarChart3, HelpCircle, Loader2, RefreshCw, ChevronUp, ChevronDown, Check, TrendingUp
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
