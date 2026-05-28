@@ -124,4 +124,9 @@ export async function downloadEnhancedDocx(enhancementId, mode = 'professional',
   document.body.removeChild(a);
 }
 
+export async function generateInterviewAnswer(analysisId, question) {
+  const response = await api.post(`/history/${analysisId}/interview-answer`, { question });
+  return response.data;
+}
+
 export default api;

@@ -101,3 +101,79 @@ async def delete_analysis(analysis_id: str, user: Optional[dict] = Depends(get_c
         del store[analysis_id]
 
     return {"status": "deleted", "id": analysis_id}
+
+
+from pydantic import BaseModel
+
+class InterviewAnswerRequest(BaseModel):
+    question: str
+
+@router.post(
+    "/history/{analysis_id}/interview-answer",
+    responses={404: {"model": ErrorResponse}},
+)
+async def generate_interview_question_answer(
+    analysis_id: str,
+    req: InterviewAnswerRequest,
+    user: Optional[dict] = Depends(get_current_user)
+):
+    """Generate a custom AI answer for a single interview question, and persist it to the record."""
+    from app.services.analyzer import generate_single_answer
+    
+    # 1. Lookup the analysis record
+    record = None
+    if user:
+        db = get_db()
+        doc = db.collection("analyses").document(analysis_id).get()
+        if doc.exists:
+            data = doc.to_dict()
+            if data.get("user_id") == user["uid"]:
+                record = data
+    else:
+        store = get_guest_store()
+        record = store.get(analysis_id)
+        if record:
+            record = record.model_dump()
+            
+    if not record:
+        raise HTTPException(status_code=404, detail="Analysis not found.")
+        
+    resume_text = record.get("resume_text", "")
+    job_description = record.get("job_description")
+    
+    # 2. Call LLM to generate custom answer
+    answer = await generate_single_answer(resume_text, req.question, job_description)
+    
+    # 3. Update the record so we persist the generated answer for future calls
+    analysis = record.get("analysis", {})
+    questions = analysis.get("interview_questions", [])
+    
+    updated_questions = []
+    found = False
+    for q in questions:
+        q_text = q if isinstance(q, str) else q.get("question", "")
+        if q_text.strip().lower() == req.question.strip().lower():
+            updated_questions.append({"question": req.question, "answer": answer})
+            found = True
+        else:
+            updated_questions.append(q)
+            
+    if not found:
+        updated_questions.append({"question": req.question, "answer": answer})
+        
+    analysis["interview_questions"] = updated_questions
+    record["analysis"] = analysis
+    
+    # 4. Save back to Firestore or in-memory
+    if user:
+        db = get_db()
+        db.collection("analyses").document(analysis_id).set(record)
+    else:
+        store = get_guest_store()
+        from app.models.schemas import AnalysisRecord
+        if isinstance(record.get("uploaded_at"), str):
+            from datetime import datetime
+            record["uploaded_at"] = datetime.fromisoformat(record["uploaded_at"])
+        store[analysis_id] = AnalysisRecord.model_validate(record)
+        
+    return {"question": req.question, "answer": answer}

@@ -171,3 +171,52 @@ async def analyze_resume(
                     f"Run: ollama create {settings.ollama_model} -f Modelfile"
                 ) from e
             raise RuntimeError(f"Ollama analysis failed: {e}") from e
+
+
+async def generate_single_answer(
+    resume_text: str,
+    question: str,
+    job_description: Optional[str] = None
+) -> str:
+    """Generate a STAR suggested answer for a single interview question based on resume."""
+    from app.utils.prompts import SINGLE_QUESTION_ANSWER_PROMPT
+    
+    job_context = ""
+    if job_description and job_description.strip():
+        job_context = f"\nTARGET JOB DESCRIPTION:\n{job_description.strip()}\n"
+        
+    prompt = SINGLE_QUESTION_ANSWER_PROMPT.format(
+        question=question,
+        resume_text=resume_text,
+        job_context=job_context
+    )
+    
+    provider = settings.ai_provider
+    try:
+        if provider == "groq":
+            from groq import Groq
+            client = Groq(api_key=settings.groq_api_key)
+            response = client.chat.completions.create(
+                model=settings.groq_model,
+                messages=[
+                    {"role": "system", "content": "You are a professional technical recruiter and career coach. Return only the suggested answer without formatting using the STAR method."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.4,
+                max_tokens=2048,
+            )
+            return response.choices[0].message.content.strip()
+        else:
+            import ollama
+            response = ollama.chat(
+                model=settings.ollama_model,
+                messages=[
+                    {"role": "system", "content": "You are a professional technical recruiter and career coach. Return only the suggested answer without formatting using the STAR method."},
+                    {"role": "user", "content": prompt}
+                ],
+                options={"temperature": 0.4},
+            )
+            return response.message.content.strip()
+    except Exception as e:
+        logger.error(f"Failed to generate single answer: {e}")
+        return "Focus on structuring your response using the STAR method (Situation, Task, Action, Result). Emphasize your key achievements and contributions from your resume."

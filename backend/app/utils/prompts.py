@@ -56,3 +56,20 @@ Provide your analysis as a JSON object with the following structure:
 
 Be specific about the match/mismatch between resume content and job requirements.
 Return ONLY valid JSON, no markdown formatting."""
+
+
+SINGLE_QUESTION_ANSWER_PROMPT = """You are an elite expert AI career coach and technical recruiter.
+Provide a highly professional, detailed, and specific sample answer for the following interview question, tailored specifically to the candidate's resume content and using the STAR method (Situation, Task, Action, Result).
+
+INTERVIEW QUESTION:
+{question}
+
+CANDIDATE RESUME:
+---
+{resume_text}
+---
+
+{job_context}
+
+Provide a highly compelling, specific, and quantified answer that highlights the candidate's actual skills and achievements from their resume.
+Return ONLY the text of the suggested answer. Do not include any introductory or concluding remarks, and do not use markdown formatting."""

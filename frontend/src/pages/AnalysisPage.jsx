@@ -18,7 +18,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import ScoreRing from '@/components/shared/ScoreRing';
 import SkillHeatmap from '@/components/shared/SkillHeatmap';
 import { CardSkeleton, ScoreSkeleton } from '@/components/shared/LoadingSkeleton';
-import { getAnalysis } from '@/lib/api';
+import { getAnalysis, generateInterviewAnswer } from '@/lib/api';
 import { generatePDFReport } from '@/lib/pdfReport';
 
 const fadeIn = {
@@ -56,6 +56,35 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(!data);
   const [exporting, setExporting] = useState(false);
   const [activeSocialLinks, setActiveSocialLinks] = useState([]);
+  const [generatingAnswers, setGeneratingAnswers] = useState({});
+  const [customAnswers, setCustomAnswers] = useState({});
+
+  const handleGenerateAnswer = async (questionText) => {
+    setGeneratingAnswers(prev => ({ ...prev, [questionText]: true }));
+    try {
+      const res = await generateInterviewAnswer(id, questionText);
+      setCustomAnswers(prev => ({ ...prev, [questionText]: res.answer }));
+      setData(prev => {
+        if (!prev) return prev;
+        const copy = JSON.parse(JSON.stringify(prev));
+        const analysisObj = copy.analysis || copy;
+        if (analysisObj.interview_questions) {
+          analysisObj.interview_questions = analysisObj.interview_questions.map(q => {
+            const qTxt = typeof q === 'string' ? q : q.question || '';
+            if (qTxt.trim().lower() === questionText.trim().lower()) {
+              return { question: questionText, answer: res.answer };
+            }
+            return q;
+          });
+        }
+        return copy;
+      });
+    } catch (err) {
+      console.error("Failed to generate answer on-the-fly:", err);
+    } finally {
+      setGeneratingAnswers(prev => ({ ...prev, [questionText]: false }));
+    }
+  };
 
   useEffect(() => {
     const cached = localStorage.getItem('smartresume-social-links');
@@ -561,9 +590,12 @@ export default function AnalysisPage() {
             <Accordion type="single" collapsible className="space-y-2">
               {(analysis.interview_questions || []).map((q, i) => {
                 const questionText = typeof q === 'string' ? q : q.question || '';
-                const answerText = typeof q === 'string'
-                  ? 'Prepare a structured STAR answer drawing from your most relevant experience. Focus on quantified outcomes and your specific contribution.'
-                  : q.answer || '';
+                const isLegacy = typeof q === 'string';
+                
+                const isGenerating = generatingAnswers[questionText];
+                const hasGeneratedAnswer = customAnswers[questionText];
+                
+                const answerText = isLegacy ? hasGeneratedAnswer : q.answer;
 
                 return (
                   <AccordionItem key={i} value={`q-${i}`} className="border-white/8 rounded-xl overflow-hidden">
@@ -577,7 +609,33 @@ export default function AnalysisPage() {
                     </AccordionTrigger>
                     <AccordionContent className="text-sm text-muted-foreground pl-13 pr-4 pb-4 leading-relaxed">
                       <div className="pl-9 border-l border-indigo-500/20 whitespace-pre-line">
-                        {answerText}
+                        {isGenerating ? (
+                          <div className="flex flex-col items-center justify-center py-6 px-4 gap-3 bg-indigo-500/5 rounded-2xl border border-indigo-500/15 text-center animate-pulse">
+                            <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                            <div>
+                              <p className="text-xs font-bold text-foreground">Analyzing Resume...</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">AI is reviewing your experience to craft a personalized suggested answer.</p>
+                            </div>
+                          </div>
+                        ) : answerText ? (
+                          <p className="text-foreground leading-relaxed">{answerText}</p>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/3 border border-white/6 text-left">
+                            <div className="max-w-md">
+                              <p className="text-xs font-bold text-foreground">Need a custom suggested answer?</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                                Since this is a legacy analysis, the answer is not yet tailored. Let our AI craft a personalized STAR response based on your exact resume experience.
+                              </p>
+                            </div>
+                            <Button
+                              onClick={() => handleGenerateAnswer(questionText)}
+                              className="rounded-xl flex-shrink-0 gap-1.5 text-xs py-1.5 h-auto px-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
+                              Generate with AI
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
