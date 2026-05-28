@@ -130,10 +130,11 @@ export default function ModeSelector({ selected, onSelect }) {
             {/* Active glow border pulse */}
             {isSelected && (
               <motion.div
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{
-                  boxShadow: `0 0 0 1.5px var(--tw-gradient-from)`,
-                }}
+                className={`absolute inset-0 rounded-2xl pointer-events-none border-2 bg-transparent
+                  ${mode.id === 'professional' ? 'border-indigo-500/40' : ''}
+                  ${mode.id === 'technical' ? 'border-cyan-500/40' : ''}
+                  ${mode.id === 'executive' ? 'border-amber-500/40' : ''}
+                  ${mode.id === 'fresher' ? 'border-emerald-500/40' : ''}`}
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />

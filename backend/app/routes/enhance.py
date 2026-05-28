@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 
 from app.config import settings
 from app.models.schemas import (
-    EnhanceRequest, EnhanceResponse, EnhancedResumeRecord, ErrorResponse
+    EnhanceRequest, EnhanceResponse, EnhancedResumeRecord, ErrorResponse, EnhancedResume
 )
 from app.services.enhancer import enhance_resume, VALID_MODES
 from app.services.auth import get_current_user
@@ -252,7 +252,10 @@ def _generate_docx(enhanced: "EnhancedResume", social_links: list = None, displa
             run.font.color.rgb = RGBColor(107, 114, 128)
 
     # ── Social Links ──
-    active_social = [l for l in (social_links or []) if l.get("is_enabled", True)]
+    active_social = [
+        l for l in (social_links or [])
+        if l.get("is_enabled", True) and l.get("url")
+    ]
     if active_social:
         import docx.opc.constants
         
@@ -291,7 +294,8 @@ def _generate_docx(enhanced: "EnhancedResume", social_links: list = None, displa
 
         for idx, item in enumerate(active_social):
             platform_name = item.get("platform", "custom").capitalize()
-            clean_url = item.get("url", "").replace("https://", "").replace("http://", "").replace("www.", "")
+            url = item.get("url") or ""
+            clean_url = url.replace("https://", "").replace("http://", "").replace("www.", "")
             
             if display_mode == "ats_safe":
                 label_text = clean_url
@@ -301,7 +305,7 @@ def _generate_docx(enhanced: "EnhancedResume", social_links: list = None, displa
                 label = item.get("label") or platform_name
                 label_text = f"{label} ({clean_url})" if display_mode == "expanded" else label
                 
-            add_docx_hyperlink(social_para, item.get("url", ""), label_text)
+            add_docx_hyperlink(social_para, url, label_text)
             
             if idx < len(active_social) - 1:
                 sep_run = social_para.add_run("  ·  ")

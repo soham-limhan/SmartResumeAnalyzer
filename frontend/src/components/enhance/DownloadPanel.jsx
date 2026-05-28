@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, FileText, FileType2, Copy, CheckCircle2, Loader2, Sparkles, Share2, Eye } from 'lucide-react';
+import { Download, FileText, FileType, Copy, CheckCircle2, Loader2, Sparkles, Share2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { generateEnhancedPDF } from '@/lib/enhancedPdfExport';
 import { downloadEnhancedDocx } from '@/lib/api';
 
@@ -11,7 +12,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
   const [copied, setCopied] = useState(false);
   const [pdfDone, setPdfDone] = useState(false);
   const [docxDone, setDocxDone] = useState(false);
-  
+
   // New State for Social Links Integration on download
   const [exportMode, setExportMode] = useState('compact');
   const [socialLinks, setSocialLinks] = useState([]);
@@ -137,7 +138,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
               {activeLinks.length} Links Active
             </Badge>
           </div>
-          
+
           {/* visual buttons */}
           <div className="grid grid-cols-4 gap-1.5">
             {[
@@ -167,7 +168,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
             <span className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1">
               <Eye className="w-3 h-3" /> Visual Placement Preview
             </span>
-            
+
             {/* compact mockup */}
             {exportMode === 'compact' && (
               <div className="flex items-center gap-1.5 text-[8.5px] text-white/70 font-mono">
@@ -267,7 +268,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             </motion.div>
           ) : (
-            <FileType2 className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+            <FileType className="w-5 h-5 text-indigo-400 flex-shrink-0" />
           )}
 
           <div className="text-left">
