@@ -559,24 +559,30 @@ export default function AnalysisPage() {
             </div>
 
             <Accordion type="single" collapsible className="space-y-2">
-              {(analysis.interview_questions || []).map((q, i) => (
-                <AccordionItem key={i} value={`q-${i}`} className="border-white/8 rounded-xl overflow-hidden">
-                  <AccordionTrigger className="text-sm hover:no-underline py-3.5 px-4 hover:bg-white/3 transition-colors rounded-xl">
-                    <span className="flex items-center gap-3 text-left">
-                      <span className="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {i + 1}
+              {(analysis.interview_questions || []).map((q, i) => {
+                const questionText = typeof q === 'string' ? q : q.question || '';
+                const answerText = typeof q === 'string'
+                  ? 'Prepare a structured STAR answer drawing from your most relevant experience. Focus on quantified outcomes and your specific contribution.'
+                  : q.answer || '';
+
+                return (
+                  <AccordionItem key={i} value={`q-${i}`} className="border-white/8 rounded-xl overflow-hidden">
+                    <AccordionTrigger className="text-sm hover:no-underline py-3.5 px-4 hover:bg-white/3 transition-colors rounded-xl">
+                      <span className="flex items-center gap-3 text-left">
+                        <span className="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                          {i + 1}
+                        </span>
+                        {questionText}
                       </span>
-                      {q}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground pl-13 pr-4 pb-4 leading-relaxed">
-                    <div className="pl-9 border-l border-indigo-500/20">
-                      Prepare a structured STAR answer drawing from your most relevant experience.
-                      Focus on quantified outcomes and your specific contribution.
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground pl-13 pr-4 pb-4 leading-relaxed">
+                      <div className="pl-9 border-l border-indigo-500/20 whitespace-pre-line">
+                        {answerText}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
             </Accordion>
           </GlassCard>
         </TabsContent>

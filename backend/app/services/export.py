@@ -66,7 +66,14 @@ def generate_text_report(record: dict) -> str:
     lines.append("INTERVIEW QUESTIONS")
     lines.append("-" * 40)
     for i, q in enumerate(analysis.get("interview_questions", []), 1):
-        lines.append(f"  {i}. {q}")
+        if hasattr(q, "question") or isinstance(q, dict):
+            question_text = q.question if hasattr(q, "question") else q.get("question", "")
+            answer_text = q.answer if hasattr(q, "answer") else q.get("answer", "")
+            lines.append(f"  {i}. Q: {question_text}")
+            if answer_text:
+                lines.append(f"     A: {answer_text}")
+        else:
+            lines.append(f"  {i}. {q}")
     lines.append("")
 
     lines.append("-" * 40)

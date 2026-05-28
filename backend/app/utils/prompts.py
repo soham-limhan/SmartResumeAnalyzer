@@ -16,7 +16,7 @@ Provide your analysis as a JSON object with the following structure:
 - missing_skills: array of strings, critical skills missing for their apparent target role
 - keyword_analysis: array of objects with {{keyword, count, relevance}} where relevance is "high", "medium", or "low"
 - suggestions: array of strings, 5-8 specific actionable improvement recommendations
-- interview_questions: array of strings, 5-7 targeted interview questions based on this resume
+- interview_questions: array of objects with {{question, answer}}, where each object contains a targeted interview question and a highly detailed suggested answer tailored specifically to this candidate (based on their resume and the STAR method).
 - recruiter_feedback: string, a paragraph of honest recruiter-perspective feedback
 - skill_scores: array of objects with {{name, score (0-100), category}} for each detected skill
 - experience_level: string, one of "junior", "mid", "senior", "executive"
@@ -47,7 +47,7 @@ Provide your analysis as a JSON object with the following structure:
 - missing_skills: array of strings, skills from the job description missing in the resume
 - keyword_analysis: array of objects with {{keyword, count, relevance}} — focus on job-relevant keywords
 - suggestions: array of strings, specific recommendations to better match this job
-- interview_questions: array of strings, interview questions based on the job + resume combination
+- interview_questions: array of objects with {{question, answer}}, where each object contains a targeted interview question and a highly detailed suggested answer tailored specifically to this candidate (based on their resume and the STAR method).
 - recruiter_feedback: string, assessment of the candidate from a recruiter reviewing for this role
 - job_match_score: integer 0-100, overall match percentage between resume and job description
 - skill_scores: array of objects with {{name, score (0-100), category}} for job-required skills

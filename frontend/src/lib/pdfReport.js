@@ -446,11 +446,17 @@ export async function generatePDFReport(data, id) {
     y = drawSectionTitle(doc, 'Potential Interview Questions', y, COLORS.primary);
 
     for (let i = 0; i < questions.length; i++) {
-      y = ensureSpace(doc, y, 14, pageHeight, margin);
+      const q = questions[i];
+      const qText = typeof q === 'string' ? q : q.question || '';
+      const aText = typeof q === 'string' ? '' : q.answer || '';
+
+      const qLines = doc.splitTextToSize(qText, contentWidth - 20);
+      const aLines = aText ? doc.splitTextToSize(`Suggested Answer: ${aText}`, contentWidth - 20) : [];
+      
+      const qHeight = qLines.length * 4.5 + (aLines.length ? aLines.length * 4.5 + 4 : 0) + 6;
+      y = ensureSpace(doc, y, qHeight + 4, pageHeight, margin);
 
       // Question card background
-      const qLines = doc.splitTextToSize(questions[i], contentWidth - 20);
-      const qHeight = qLines.length * 4.5 + 6;
       drawRoundedRect(doc, margin, y - 3, contentWidth, qHeight, 2, COLORS.card);
 
       // Left accent bar
@@ -464,9 +470,16 @@ export async function generatePDFReport(data, id) {
       doc.text(`Q${i + 1}.`, margin + 6, y + 2);
 
       // Question text
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('helvetica', 'bold');
       setColor(doc, COLORS.text);
       doc.text(qLines, margin + 16, y + 2);
+
+      if (aLines.length) {
+        // Suggested Answer
+        doc.setFont('helvetica', 'normal');
+        setColor(doc, COLORS.textMuted);
+        doc.text(aLines, margin + 16, y + 2 + qLines.length * 4.5 + 2);
+      }
 
       y += qHeight + 3;
     }

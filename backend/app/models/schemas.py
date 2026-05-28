@@ -43,6 +43,12 @@ class KeywordAnalysis(BaseModel):
         return str(v)
 
 
+class InterviewQuestion(BaseModel):
+    """An interview question and suggested answer."""
+    question: str
+    answer: str
+
+
 class ResumeAnalysis(BaseModel):
     """Complete AI analysis result for a resume."""
     ats_score: int = Field(ge=0, le=100, description="ATS compatibility score")
@@ -53,7 +59,7 @@ class ResumeAnalysis(BaseModel):
     missing_skills: list[str] = Field(description="Critical missing skills")
     keyword_analysis: list[KeywordAnalysis] = Field(description="Keyword frequency data")
     suggestions: list[str] = Field(description="Actionable improvement recommendations")
-    interview_questions: list[str] = Field(description="Potential interview questions")
+    interview_questions: list[Union[InterviewQuestion, str]] = Field(description="Potential interview questions and suggested answers")
     recruiter_feedback: str = Field(description="Recruiter-perspective feedback")
     job_match_score: Optional[int] = Field(default=None, ge=0, le=100)
     skill_scores: list[SkillScore] = Field(description="Skill proficiency breakdown")
