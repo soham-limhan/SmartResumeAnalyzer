@@ -115,7 +115,7 @@ export function detectPlatform(url) {
 }
 
 export default function SocialLinksManager({ onChange }) {
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const [links, setLinks] = useState([]);
   const [displayMode, setDisplayMode] = useState('compact');
   const [loading, setLoading] = useState(true);
@@ -136,7 +136,7 @@ export default function SocialLinksManager({ onChange }) {
 
       if (user) {
         try {
-          const token = await user.getToken?.() || localStorage.getItem('firebase-token');
+          const token = await getToken() || localStorage.getItem('firebase-token');
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
           const res = await axios.get(`${API_URL}/social-links`, { headers });
           if (res.data.links) {
@@ -262,7 +262,7 @@ export default function SocialLinksManager({ onChange }) {
 
     if (user) {
       try {
-        const token = await user.getToken?.() || localStorage.getItem('firebase-token');
+        const token = await getToken() || localStorage.getItem('firebase-token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const payload = {
           display_mode: displayMode,
