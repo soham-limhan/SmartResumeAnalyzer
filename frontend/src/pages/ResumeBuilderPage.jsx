@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import ResumeTemplates from '@/components/enhance/ResumeTemplates';
+import ResumeTemplates, { AutoSizedPreview } from '@/components/enhance/ResumeTemplates';
 import { exportBuilderResumePDF } from '@/lib/builderPdfExport';
 import axios from 'axios';
 
@@ -66,6 +66,91 @@ export default function ResumeBuilderPage() {
   const [exportingDocx, setExportingDocx] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [pageBudget, setPageBudget] = useState(1);
+
+  // Compute preview data containing in-progress input values
+  const getPreviewResumeData = () => {
+    const previewData = {
+      ...resumeData,
+      personalInfo: { ...resumeData.personalInfo },
+      education: [...resumeData.education],
+      experience: [...resumeData.experience],
+      skills: {
+        technical: [...(resumeData.skills?.technical || [])],
+        soft: [...(resumeData.skills?.soft || [])],
+        languages: [...(resumeData.skills?.languages || [])],
+        certifications: [...(resumeData.skills?.certifications || [])],
+      },
+      projects: [...(resumeData.projects || [])],
+    };
+
+    // 1. Merge active education form if any field is being typed
+    const hasEduDraft = eduForm.degree || eduForm.institution || eduForm.startDate || eduForm.endDate || eduForm.gpa || eduForm.description;
+    if (hasEduDraft) {
+      previewData.education = [...previewData.education, {
+        id: 'draft-edu',
+        degree: eduForm.degree || '',
+        institution: eduForm.institution || '',
+        startDate: eduForm.startDate || '',
+        endDate: eduForm.endDate || '',
+        gpa: eduForm.gpa || '',
+        description: eduForm.description || '',
+        isDraft: true
+      }];
+    }
+
+    // 2. Merge active experience form if any field is being typed
+    const hasExpDraft = expForm.jobTitle || expForm.company || expForm.location || expForm.startDate || expForm.endDate || expForm.responsibilities || expForm.achievements;
+    if (hasExpDraft) {
+      previewData.experience = [...previewData.experience, {
+        id: 'draft-exp',
+        jobTitle: expForm.jobTitle || '',
+        company: expForm.company || '',
+        location: expForm.location || '',
+        startDate: expForm.startDate || '',
+        endDate: expForm.endDate || (expForm.current ? 'Present' : ''),
+        current: expForm.current,
+        responsibilities: expForm.responsibilities || '',
+        achievements: expForm.achievements || '',
+        isDraft: true
+      }];
+    }
+
+    // 3. Merge active project form if any field is being typed
+    const hasProjDraft = projForm.projectName || projForm.description || projForm.technologies || projForm.githubLink || projForm.liveDemoLink;
+    if (hasProjDraft) {
+      const techList = projForm.technologies
+        ? projForm.technologies.split(',').map(t => t.trim()).filter(Boolean)
+        : [];
+      previewData.projects = [...previewData.projects, {
+        id: 'draft-proj',
+        projectName: projForm.projectName || '',
+        description: projForm.description || '',
+        technologies: techList,
+        githubLink: projForm.githubLink || '',
+        liveDemoLink: projForm.liveDemoLink || '',
+        isDraft: true
+      }];
+    }
+
+    // 4. Merge active skill tag inputs
+    if (tagInputs.technical?.trim()) {
+      previewData.skills.technical = [...previewData.skills.technical, tagInputs.technical.trim() + ' (typing...)'];
+    }
+    if (tagInputs.soft?.trim()) {
+      previewData.skills.soft = [...previewData.skills.soft, tagInputs.soft.trim() + ' (typing...)'];
+    }
+    if (tagInputs.languages?.trim()) {
+      previewData.skills.languages = [...previewData.skills.languages, tagInputs.languages.trim() + ' (typing...)'];
+    }
+    if (tagInputs.certifications?.trim()) {
+      previewData.skills.certifications = [...previewData.skills.certifications, tagInputs.certifications.trim() + ' (typing...)'];
+    }
+
+    return previewData;
+  };
+
+  const previewResumeData = getPreviewResumeData();
 
   // Load draft on mount
   useEffect(() => {
@@ -265,7 +350,7 @@ export default function ResumeBuilderPage() {
   // Export actions
   const handleExportPdf = () => {
     const safeName = (resumeData.personalInfo.fullName || 'resume').replace(/\s+/g, '_').toLowerCase();
-    exportBuilderResumePDF(resumeData, `${safeName}_resume.pdf`);
+    exportBuilderResumePDF(resumeData, `${safeName}_resume.pdf`, { pageBudget });
   };
 
   const handleExportDocx = async () => {
@@ -293,7 +378,7 @@ export default function ResumeBuilderPage() {
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
-    const resumeHTML = document.getElementById('resume-live-preview-box')?.innerHTML || '';
+    const resumeHTML = document.getElementById('resume-print-box')?.innerHTML || '';
     
     printWindow.document.write(`
       <html>
@@ -728,18 +813,59 @@ export default function ResumeBuilderPage() {
 
       {/* Right: Live Preview Box */}
       <div className="lg:w-[480px] xl:w-[500px] flex flex-col gap-3 flex-shrink-0">
-        <div className="flex items-center justify-between bg-card border border-border px-4 py-2.5 rounded-xl">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Live Preview</span>
-          <Badge variant="secondary" className="text-[9px] px-2 py-0.5 rounded-md font-mono border-border bg-secondary">
-            {resumeData.designTemplate}
-          </Badge>
+        <div className="flex items-center justify-between bg-card border border-border px-4 py-2 rounded-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Live Preview</span>
+            <Badge variant="secondary" className="text-[9px] px-2 py-0.5 rounded-md font-mono border-border bg-secondary">
+              {resumeData.designTemplate}
+            </Badge>
+          </div>
+          
+          {/* Page Budget selector (1 Page Fit vs 2 Pages) */}
+          <div className="flex items-center gap-1 bg-muted/65 p-0.5 rounded-lg border border-border">
+            <button
+              onClick={() => setPageBudget(1)}
+              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${
+                pageBudget === 1
+                  ? 'bg-background text-foreground shadow-sm border border-border'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              1 Page Fit
+            </button>
+            <button
+              onClick={() => setPageBudget(2)}
+              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${
+                pageBudget === 2
+                  ? 'bg-background text-foreground shadow-sm border border-border'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              2 Pages
+            </button>
+          </div>
         </div>
 
         {/* Outer scrolling preview wrapper */}
-        <div className="border border-border rounded-xl bg-muted/30 p-2.5 overflow-auto max-h-[720px] shadow-sm">
-          <div id="resume-live-preview-box" className="origin-top scale-[0.78] sm:scale-[0.8] md:scale-[0.88] lg:scale-[0.92] xl:scale-100 max-w-full">
-            <ResumeTemplates resumeData={resumeData} templateId={resumeData.designTemplate} />
-          </div>
+        <div className="border border-border rounded-xl bg-muted/30 p-3 overflow-auto max-h-[720px] shadow-sm flex items-center justify-center">
+          <AutoSizedPreview pageBudget={pageBudget}>
+            <ResumeTemplates 
+              resumeData={previewResumeData} 
+              templateId={resumeData.designTemplate} 
+              isBuilderMode={true} 
+            />
+          </AutoSizedPreview>
+        </div>
+      </div>
+
+      {/* Hidden Container for Clean Print (No empty states or drafts) */}
+      <div className="hidden">
+        <div id="resume-print-box">
+          <ResumeTemplates 
+            resumeData={resumeData} 
+            templateId={resumeData.designTemplate} 
+            isBuilderMode={false} 
+          />
         </div>
       </div>
     </div>

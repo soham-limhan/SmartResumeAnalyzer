@@ -437,11 +437,11 @@ export function exportBuilderResumePDF(resumeData, filename = 'resume.pdf', opti
   ].filter(cat => cat.list && cat.list.length > 0);
 
   if (skillCategories.length > 0) {
-    y = verifyPageBreak(doc, y, 22);
+    y = verifyPageBreak(y, 22);
     y = drawSectionHeader(y, 'Skills & Credentials');
 
     skillCategories.forEach((cat) => {
-      y = verifyPageBreak(doc, y, 10);
+      y = verifyPageBreak(y, 10);
       setColor(doc, COLORS.dark, 'text');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(FONT_SIZES.body);

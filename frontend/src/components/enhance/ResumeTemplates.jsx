@@ -30,8 +30,8 @@ export function AutoSizedPreview({ children, pageBudget = 1 }) {
       const W_wrapper = parent ? parent.offsetWidth - 12 : resumeWidth;
       const widthScale = W_wrapper < resumeWidth ? W_wrapper / resumeWidth : 1;
 
-      // 3. Final scale is product of height and width scales
-      setScale(heightScale * widthScale);
+      // 3. Final scale is the minimum of height and width scales to fit both dimensions
+      setScale(Math.min(heightScale, widthScale));
     };
 
     updateScale();
@@ -89,51 +89,31 @@ export function AutoSizedPreview({ children, pageBudget = 1 }) {
   );
 }
 
-export default function ResumeTemplates({ resumeData, templateId }) {
+const getDraftClass = (isDraft, isDark = false) => {
+  if (!isDraft) return "";
+  return `border border-dashed ${isDark ? 'border-emerald-500/40 bg-emerald-500/5 text-zinc-300' : 'border-blue-500/40 bg-blue-50/20 text-slate-800'} p-2 rounded relative opacity-85 transition-all`;
+};
+
+export default function ResumeTemplates({ resumeData, templateId, isBuilderMode = true }) {
   if (!resumeData) return null;
 
   const { personalInfo = {} } = resumeData;
 
-  const isEmpty = (arr) => !arr || arr.length === 0;
-
-  const education = isEmpty(resumeData.education) ? [{
-    id: 'placeholder-edu',
-    degree: 'Your Degree / Certification Title',
-    institution: 'University or College Name',
-    startDate: 'Sept 2020',
-    endDate: 'June 2024',
-    gpa: '3.8 / 4.0',
-    description: 'Provide an overview of your major, honors, GPA, and extracurricular activities.'
-  }] : resumeData.education;
-
-  const experience = isEmpty(resumeData.experience) ? [{
-    id: 'placeholder-exp',
-    jobTitle: 'Your Role / Job Title',
-    company: 'Company / Organization Name',
-    location: 'City, State',
-    startDate: 'Jan 2022',
-    endDate: 'Present',
-    current: true,
-    responsibilities: 'Describe your responsibilities, duties, and specific contributions.\nHighlight achievements and quantify metrics where possible (e.g. Led a team of X, boosted conversion by Y%).',
-    achievements: 'Add a notable achievement here'
-  }] : resumeData.experience;
-
-  const projects = isEmpty(resumeData.projects) ? [{
-    id: 'placeholder-proj',
-    projectName: 'Your Project Name',
-    description: 'Provide a brief overview of the project, including its scope, your role, and the final results.',
-    technologies: ['React', 'Node.js', 'PostgreSQL'],
-    githubLink: 'github.com/username/project',
-    liveDemoLink: 'project-live.com'
-  }] : resumeData.projects;
-
+  const education = resumeData.education || [];
+  const experience = resumeData.experience || [];
+  const projects = resumeData.projects || [];
   const rawSkills = resumeData.skills || {};
   const skills = {
-    technical: isEmpty(rawSkills.technical) ? ['Technical Skills', 'JavaScript', 'Python'] : rawSkills.technical,
-    soft: isEmpty(rawSkills.soft) ? ['Team Leadership', 'Communication'] : rawSkills.soft,
-    languages: isEmpty(rawSkills.languages) ? ['Languages'] : rawSkills.languages,
-    certifications: isEmpty(rawSkills.certifications) ? ['Certifications'] : rawSkills.certifications,
+    technical: rawSkills.technical || [],
+    soft: rawSkills.soft || [],
+    languages: rawSkills.languages || [],
+    certifications: rawSkills.certifications || [],
   };
+
+  const hasEducation = education.length > 0;
+  const hasExperience = experience.length > 0;
+  const hasProjects = projects.length > 0;
+  const hasSkills = skills.technical.length > 0 || skills.soft.length > 0 || skills.languages.length > 0 || skills.certifications.length > 0;
 
   const renderContacts = (isAts = false) => {
     const parts = [
@@ -161,101 +141,133 @@ export default function ResumeTemplates({ resumeData, templateId }) {
       </div>
 
       {/* Summary */}
-      {personalInfo.professionalSummary && (
+      {(personalInfo.professionalSummary || isBuilderMode) && (
         <div className="mb-6">
           <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-2 border-b border-slate-100 pb-1">Professional Summary</h2>
-          <p className="text-slate-600">{personalInfo.professionalSummary}</p>
+          {personalInfo.professionalSummary ? (
+            <p className="text-slate-600">{personalInfo.professionalSummary}</p>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-slate-200 text-slate-400 text-[10px] italic rounded">
+              No summary added. Start typing in the form to preview.
+            </div>
+          )}
         </div>
       )}
 
       {/* Experience */}
-      {experience.length > 0 && (
+      {(hasExperience || isBuilderMode) && (
         <div className="mb-6">
           <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Experience</h2>
-          <div className="space-y-4">
-            {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-bold text-slate-900 text-xs">{exp.jobTitle} <span className="text-slate-400 font-normal">at</span> {exp.company}</h3>
-                  <span className="text-slate-500 text-[10px] font-medium">{exp.startDate} – {exp.endDate || (exp.current ? 'Present' : '')}</span>
+          {hasExperience ? (
+            <div className="space-y-4">
+              {experience.map((exp) => (
+                <div key={exp.id} className={getDraftClass(exp.isDraft)}>
+                  <div className="flex justify-between items-baseline">
+                    <h3 className="font-bold text-slate-900 text-xs">{exp.jobTitle || 'Job Role'} <span className="text-slate-400 font-normal">at</span> {exp.company || 'Company'}</h3>
+                    <span className="text-slate-500 text-[10px] font-medium">{exp.startDate || 'Start Date'} – {exp.endDate || (exp.current ? 'Present' : 'End Date')}</span>
+                  </div>
+                  {exp.location && <p className="text-slate-400 text-[10px] -mt-0.5">{exp.location}</p>}
+                  <div className="mt-1.5 text-slate-600 space-y-1">
+                    {exp.responsibilities && exp.responsibilities.split('\n').filter(Boolean).map((line, idx) => (
+                      <p key={idx} className="pl-3 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">{line}</p>
+                    ))}
+                    {exp.achievements && (
+                      <p className="pl-3 relative before:content-['★'] before:absolute before:left-0 before:text-amber-500 font-medium text-slate-700 italic">Key Achievement: {exp.achievements}</p>
+                    )}
+                  </div>
                 </div>
-                {exp.location && <p className="text-slate-400 text-[10px] -mt-0.5">{exp.location}</p>}
-                <div className="mt-1.5 text-slate-600 space-y-1">
-                  {exp.responsibilities && exp.responsibilities.split('\n').map((line, idx) => (
-                    <p key={idx} className="pl-3 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">{line}</p>
-                  ))}
-                  {exp.achievements && (
-                    <p className="pl-3 relative before:content-['★'] before:absolute before:left-0 before:text-amber-500 font-medium text-slate-700 italic">Key Achievement: {exp.achievements}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-slate-200 text-slate-400 text-[10px] italic rounded">
+              No work experience added. Start typing in the form to preview.
+            </div>
+          )}
         </div>
       )}
 
       {/* Projects */}
-      {projects.length > 0 && (
+      {(hasProjects || isBuilderMode) && (
         <div className="mb-6">
           <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Projects</h2>
-          <div className="space-y-3">
-            {projects.map((proj) => (
-              <div key={proj.id}>
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-bold text-slate-900 text-xs">{proj.projectName}</h3>
-                  <div className="flex gap-2 text-[10px]">
-                    {proj.githubLink && <a href={proj.githubLink} className="text-blue-600 hover:underline">GitHub</a>}
-                    {proj.liveDemoLink && <a href={proj.liveDemoLink} className="text-blue-600 hover:underline">Live Demo</a>}
+          {hasProjects ? (
+            <div className="space-y-3">
+              {projects.map((proj) => (
+                <div key={proj.id} className={getDraftClass(proj.isDraft)}>
+                  <div className="flex justify-between items-baseline">
+                    <h3 className="font-bold text-slate-900 text-xs">{proj.projectName || 'Project Name'}</h3>
+                    <div className="flex gap-2 text-[10px]">
+                      {proj.githubLink && <a href={proj.githubLink} className="text-blue-600 hover:underline">GitHub</a>}
+                      {proj.liveDemoLink && <a href={proj.liveDemoLink} className="text-blue-600 hover:underline">Live Demo</a>}
+                    </div>
                   </div>
+                  {proj.technologies && proj.technologies.length > 0 && (
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">Tech: {proj.technologies.join(', ')}</p>
+                  )}
+                  {proj.description && <p className="text-slate-600 mt-1">{proj.description}</p>}
                 </div>
-                {proj.technologies && proj.technologies.length > 0 && (
-                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">Tech: {proj.technologies.join(', ')}</p>
-                )}
-                <p className="text-slate-600 mt-1">{proj.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-slate-200 text-slate-400 text-[10px] italic rounded">
+              No projects added. Start typing in the form to preview.
+            </div>
+          )}
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Education */}
-        {education.length > 0 && (
+        {(hasEducation || isBuilderMode) && (
           <div>
             <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Education</h2>
-            <div className="space-y-3">
-              {education.map((edu) => (
-                <div key={edu.id}>
-                  <div className="flex justify-between items-baseline">
-                    <h3 className="font-bold text-slate-900 text-xs">{edu.degree}</h3>
-                    <span className="text-slate-500 text-[10px]">{edu.startDate} – {edu.endDate}</span>
+            {hasEducation ? (
+              <div className="space-y-3">
+                {education.map((edu) => (
+                  <div key={edu.id} className={getDraftClass(edu.isDraft)}>
+                    <div className="flex justify-between items-baseline">
+                      <h3 className="font-bold text-slate-900 text-xs">{edu.degree || 'Degree Title'}</h3>
+                      <span className="text-slate-500 text-[10px]">{edu.startDate} – {edu.endDate}</span>
+                    </div>
+                    <p className="text-slate-650">{edu.institution} {edu.gpa && `· GPA: ${edu.gpa}`}</p>
+                    {edu.description && <p className="text-slate-500 text-[10px] mt-0.5">{edu.description}</p>}
                   </div>
-                  <p className="text-slate-600">{edu.institution} {edu.gpa && `· GPA: ${edu.gpa}`}</p>
-                  {edu.description && <p className="text-slate-500 text-[10px] mt-0.5">{edu.description}</p>}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-2 px-3 border border-dashed border-slate-200 text-slate-400 text-[10px] italic rounded">
+                No education entries added.
+              </div>
+            )}
           </div>
         )}
 
         {/* Skills */}
-        <div>
-          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Skills</h2>
-          <div className="space-y-2 text-[11px]">
-            {skills.technical?.length > 0 && (
-              <p className="text-slate-600"><strong className="text-slate-900">Technical:</strong> {skills.technical.join(', ')}</p>
-            )}
-            {skills.soft?.length > 0 && (
-              <p className="text-slate-600"><strong className="text-slate-900">Soft Skills:</strong> {skills.soft.join(', ')}</p>
-            )}
-            {skills.languages?.length > 0 && (
-              <p className="text-slate-600"><strong className="text-slate-900">Languages:</strong> {skills.languages.join(', ')}</p>
-            )}
-            {skills.certifications?.length > 0 && (
-              <p className="text-slate-600"><strong className="text-slate-900">Certifications:</strong> {skills.certifications.join(', ')}</p>
+        {(hasSkills || isBuilderMode) && (
+          <div>
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Skills</h2>
+            {hasSkills ? (
+              <div className="space-y-2 text-[11px]">
+                {skills.technical?.length > 0 && (
+                  <p className="text-slate-600"><strong className="text-slate-900">Technical:</strong> {skills.technical.join(', ')}</p>
+                )}
+                {skills.soft?.length > 0 && (
+                  <p className="text-slate-600"><strong className="text-slate-900">Soft Skills:</strong> {skills.soft.join(', ')}</p>
+                )}
+                {skills.languages?.length > 0 && (
+                  <p className="text-slate-600"><strong className="text-slate-900">Languages:</strong> {skills.languages.join(', ')}</p>
+                )}
+                {skills.certifications?.length > 0 && (
+                  <p className="text-slate-600"><strong className="text-slate-900">Certifications:</strong> {skills.certifications.join(', ')}</p>
+                )}
+              </div>
+            ) : (
+              <div className="py-2 px-3 border border-dashed border-slate-200 text-slate-400 text-[10px] italic rounded">
+                No skills added. Enter tags in the form.
+              </div>
             )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -275,96 +287,128 @@ export default function ResumeTemplates({ resumeData, templateId }) {
       <hr className="border-t border-black mb-4" />
 
       {/* Summary */}
-      {personalInfo.professionalSummary && (
+      {(personalInfo.professionalSummary || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider mb-1">Professional Summary</h2>
-          <p className="text-justify font-sans">{personalInfo.professionalSummary}</p>
+          {personalInfo.professionalSummary ? (
+            <p className="text-justify font-sans">{personalInfo.professionalSummary}</p>
+          ) : (
+            <div className="py-1 px-2 border border-dashed border-neutral-300 text-neutral-400 text-[10px] italic">
+              [Summary empty. Add details in form]
+            </div>
+          )}
         </div>
       )}
 
       {/* Experience */}
-      {experience.length > 0 && (
+      {(hasExperience || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider mb-2">Work Experience</h2>
-          <div className="space-y-3.5">
-            {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between font-bold">
-                  <span>{exp.jobTitle} — {exp.company}</span>
-                  <span>{exp.startDate} – {exp.endDate || (exp.current ? 'Present' : '')}</span>
+          {hasExperience ? (
+            <div className="space-y-3.5">
+              {experience.map((exp) => (
+                <div key={exp.id} className={getDraftClass(exp.isDraft)}>
+                  <div className="flex justify-between font-bold">
+                    <span>{exp.jobTitle || 'Job Role'} — {exp.company || 'Company'}</span>
+                    <span>{exp.startDate || 'Start'} – {exp.endDate || (exp.current ? 'Present' : 'End')}</span>
+                  </div>
+                  {exp.location && <p className="text-[10px] italic font-sans text-neutral-650">{exp.location}</p>}
+                  <ul className="list-disc list-inside mt-1 font-sans text-neutral-800 pl-1">
+                    {exp.responsibilities && exp.responsibilities.split('\n').filter(Boolean).map((line, idx) => (
+                      <li key={idx} className="pl-1 mb-0.5">{line}</li>
+                    ))}
+                    {exp.achievements && (
+                      <li className="pl-1 list-none font-bold text-black mt-1">Key Achievement: {exp.achievements}</li>
+                    )}
+                  </ul>
                 </div>
-                {exp.location && <p className="text-[10px] italic font-sans text-neutral-600">{exp.location}</p>}
-                <ul className="list-disc list-inside mt-1 font-sans text-neutral-800 pl-1">
-                  {exp.responsibilities && exp.responsibilities.split('\n').map((line, idx) => (
-                    <li key={idx} className="pl-1 mb-0.5">{line}</li>
-                  ))}
-                  {exp.achievements && (
-                    <li className="pl-1 list-none font-bold text-black mt-1">Key Achievement: {exp.achievements}</li>
-                  )}
-                </ul>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-1 px-2 border border-dashed border-neutral-300 text-neutral-400 text-[10px] italic">
+              [No experience entries added. Details will show here]
+            </div>
+          )}
         </div>
       )}
 
       {/* Projects */}
-      {projects.length > 0 && (
+      {(hasProjects || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider mb-2">Projects</h2>
-          <div className="space-y-3">
-            {projects.map((proj) => (
-              <div key={proj.id}>
-                <div className="flex justify-between font-bold">
-                  <span>{proj.projectName}</span>
-                  {proj.githubLink && <span className="text-[10px] font-sans font-normal text-neutral-600">{proj.githubLink.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+          {hasProjects ? (
+            <div className="space-y-3">
+              {projects.map((proj) => (
+                <div key={proj.id} className={getDraftClass(proj.isDraft)}>
+                  <div className="flex justify-between font-bold">
+                    <span>{proj.projectName || 'Project Name'}</span>
+                    {proj.githubLink && <span className="text-[10px] font-sans font-normal text-neutral-600">{proj.githubLink.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+                  </div>
+                  {proj.technologies && proj.technologies.length > 0 && (
+                    <p className="text-[10px] font-sans font-medium text-neutral-600 mt-0.5">Technologies: {proj.technologies.join(', ')}</p>
+                  )}
+                  {proj.description && <p className="font-sans text-neutral-850 mt-1">{proj.description}</p>}
                 </div>
-                {proj.technologies && proj.technologies.length > 0 && (
-                  <p className="text-[10px] font-sans font-medium text-neutral-600 mt-0.5">Technologies: {proj.technologies.join(', ')}</p>
-                )}
-                <p className="font-sans text-neutral-850 mt-1">{proj.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-1 px-2 border border-dashed border-neutral-300 text-neutral-400 text-[10px] italic">
+              [No projects added. Details will show here]
+            </div>
+          )}
         </div>
       )}
 
       {/* Education */}
-      {education.length > 0 && (
+      {(hasEducation || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider mb-2">Education</h2>
-          <div className="space-y-2.5">
-            {education.map((edu) => (
-              <div key={edu.id}>
-                <div className="flex justify-between">
-                  <span className="font-bold">{edu.degree} — {edu.institution}</span>
-                  <span className="font-bold">{edu.startDate} – {edu.endDate}</span>
+          {hasEducation ? (
+            <div className="space-y-2.5">
+              {education.map((edu) => (
+                <div key={edu.id} className={getDraftClass(edu.isDraft)}>
+                  <div className="flex justify-between">
+                    <span className="font-bold">{edu.degree || 'Degree'} — {edu.institution || 'Institution'}</span>
+                    <span className="font-bold">{edu.startDate} – {edu.endDate}</span>
+                  </div>
+                  <p className="font-sans text-neutral-700">{edu.description || 'Graduated'} {edu.gpa && `· Cumulative GPA: ${edu.gpa}`}</p>
                 </div>
-                <p className="font-sans text-neutral-700">{edu.description || 'Graduated'} {edu.gpa && `· Cumulative GPA: ${edu.gpa}`}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-1 px-2 border border-dashed border-neutral-300 text-neutral-400 text-[10px] italic">
+              [No education entries added. Details will show here]
+            </div>
+          )}
         </div>
       )}
 
       {/* Skills */}
-      <div>
-        <h2 className="text-xs font-bold uppercase tracking-wider mb-1.5">Skills & Credentials</h2>
-        <div className="space-y-1 font-sans text-neutral-800">
-          {skills.technical?.length > 0 && (
-            <p><strong>Technical Skills:</strong> {skills.technical.join(', ')}</p>
-          )}
-          {skills.soft?.length > 0 && (
-            <p><strong>Soft Skills:</strong> {skills.soft.join(', ')}</p>
-          )}
-          {skills.languages?.length > 0 && (
-            <p><strong>Languages:</strong> {skills.languages.join(', ')}</p>
-          )}
-          {skills.certifications?.length > 0 && (
-            <p><strong>Certifications:</strong> {skills.certifications.join(', ')}</p>
+      {(hasSkills || isBuilderMode) && (
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-wider mb-1.5">Skills & Credentials</h2>
+          {hasSkills ? (
+            <div className="space-y-1 font-sans text-neutral-800">
+              {skills.technical?.length > 0 && (
+                <p><strong>Technical Skills:</strong> {skills.technical.join(', ')}</p>
+              )}
+              {skills.soft?.length > 0 && (
+                <p><strong>Soft Skills:</strong> {skills.soft.join(', ')}</p>
+              )}
+              {skills.languages?.length > 0 && (
+                <p><strong>Languages:</strong> {skills.languages.join(', ')}</p>
+              )}
+              {skills.certifications?.length > 0 && (
+                <p><strong>Certifications:</strong> {skills.certifications.join(', ')}</p>
+              )}
+            </div>
+          ) : (
+            <div className="py-1 px-2 border border-dashed border-neutral-300 text-neutral-400 text-[10px] italic">
+              [No skills added. Details will show here]
+            </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -388,89 +432,115 @@ export default function ResumeTemplates({ resumeData, templateId }) {
 
       <div className="space-y-6">
         {/* Summary */}
-        {personalInfo.professionalSummary && (
+        {(personalInfo.professionalSummary || isBuilderMode) && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Profile</span>
-            <p className="md:col-span-9 text-zinc-600 font-light text-justify">{personalInfo.professionalSummary}</p>
+            <div className="md:col-span-9">
+              {personalInfo.professionalSummary ? (
+                <p className="text-zinc-650 font-light text-justify">{personalInfo.professionalSummary}</p>
+              ) : (
+                <span className="text-zinc-400 font-light italic text-[10px]">no profile summary added yet.</span>
+              )}
+            </div>
           </div>
         )}
 
         {/* Experience */}
-        {experience.length > 0 && (
+        {(hasExperience || isBuilderMode) && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Experience</span>
             <div className="md:col-span-9 space-y-4">
-              {experience.map((exp) => (
-                <div key={exp.id}>
-                  <div className="flex justify-between items-baseline font-medium text-zinc-900">
-                    <span>{exp.jobTitle} <span className="text-zinc-400 font-light">— {exp.company}</span></span>
-                    <span className="text-[10px] text-zinc-400">{exp.startDate} – {exp.endDate || 'Present'}</span>
+              {hasExperience ? (
+                experience.map((exp) => (
+                  <div key={exp.id} className={getDraftClass(exp.isDraft)}>
+                    <div className="flex justify-between items-baseline font-medium text-zinc-900">
+                      <span>{exp.jobTitle || 'Job Role'} <span className="text-zinc-400 font-light">— {exp.company || 'Company'}</span></span>
+                      <span className="text-[10px] text-zinc-400">{exp.startDate} – {exp.endDate || 'Present'}</span>
+                    </div>
+                    <div className="mt-1 text-zinc-500 font-light space-y-0.5">
+                      {exp.responsibilities && exp.responsibilities.split('\n').filter(Boolean).map((line, idx) => (
+                        <p key={idx}>{line}</p>
+                      ))}
+                    </div>
                   </div>
-                  <div className="mt-1 text-zinc-500 font-light space-y-0.5">
-                    {exp.responsibilities && exp.responsibilities.split('\n').map((line, idx) => (
-                      <p key={idx}>{line}</p>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <span className="text-zinc-400 font-light italic text-[10px]">no work experience details added yet.</span>
+              )}
             </div>
           </div>
         )}
 
         {/* Projects */}
-        {projects.length > 0 && (
+        {(hasProjects || isBuilderMode) && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Projects</span>
             <div className="md:col-span-9 space-y-3">
-              {projects.map((proj) => (
-                <div key={proj.id}>
-                  <div className="flex justify-between items-baseline font-medium text-zinc-900">
-                    <span>{proj.projectName}</span>
-                    <span className="text-[9.5px] font-light text-zinc-400">{proj.technologies?.join(', ')}</span>
+              {hasProjects ? (
+                projects.map((proj) => (
+                  <div key={proj.id} className={getDraftClass(proj.isDraft)}>
+                    <div className="flex justify-between items-baseline font-medium text-zinc-900">
+                      <span>{proj.projectName || 'Project Name'}</span>
+                      <span className="text-[9.5px] font-light text-zinc-400">{proj.technologies?.join(', ')}</span>
+                    </div>
+                    {proj.description && <p className="text-zinc-500 font-light mt-0.5">{proj.description}</p>}
                   </div>
-                  <p className="text-zinc-500 font-light mt-0.5">{proj.description}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <span className="text-zinc-400 font-light italic text-[10px]">no projects details added yet.</span>
+              )}
             </div>
           </div>
         )}
 
         {/* Education */}
-        {education.length > 0 && (
+        {(hasEducation || isBuilderMode) && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Education</span>
             <div className="md:col-span-9 space-y-3">
-              {education.map((edu) => (
-                <div key={edu.id}>
-                  <div className="flex justify-between font-medium text-zinc-900">
-                    <span>{edu.degree}</span>
-                    <span className="text-[10px] font-light text-zinc-400">{edu.startDate} – {edu.endDate}</span>
+              {hasEducation ? (
+                education.map((edu) => (
+                  <div key={edu.id} className={getDraftClass(edu.isDraft)}>
+                    <div className="flex justify-between font-medium text-zinc-900">
+                      <span>{edu.degree || 'Degree'}</span>
+                      <span className="text-[10px] font-light text-zinc-400">{edu.startDate} – {edu.endDate}</span>
+                    </div>
+                    <p className="text-zinc-500 font-light">{edu.institution} {edu.gpa && `· GPA: ${edu.gpa}`}</p>
                   </div>
-                  <p className="text-zinc-500 font-light">{edu.institution} {edu.gpa && `· GPA: ${edu.gpa}`}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <span className="text-zinc-400 font-light italic text-[10px]">no education credentials added yet.</span>
+              )}
             </div>
           </div>
         )}
 
         {/* Skills */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Skills</span>
-          <div className="md:col-span-9 grid grid-cols-2 gap-4 text-[10.5px]">
-            {skills.technical?.length > 0 && (
-              <div>
-                <strong className="block text-zinc-800 font-semibold mb-0.5">Technical</strong>
-                <p className="font-light text-zinc-500">{skills.technical.join(', ')}</p>
-              </div>
-            )}
-            {skills.soft?.length > 0 && (
-              <div>
-                <strong className="block text-zinc-800 font-semibold mb-0.5">Soft Skills</strong>
-                <p className="font-light text-zinc-500">{skills.soft.join(', ')}</p>
-              </div>
-            )}
+        {(hasSkills || isBuilderMode) && (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <span className="md:col-span-3 text-[10px] tracking-widest font-bold uppercase text-zinc-400">Skills</span>
+            <div className="md:col-span-9 grid grid-cols-2 gap-4 text-[10.5px]">
+              {hasSkills ? (
+                <>
+                  {skills.technical?.length > 0 && (
+                    <div>
+                      <strong className="block text-zinc-800 font-semibold mb-0.5">Technical</strong>
+                      <p className="font-light text-zinc-500">{skills.technical.join(', ')}</p>
+                    </div>
+                  )}
+                  {skills.soft?.length > 0 && (
+                    <div>
+                      <strong className="block text-zinc-800 font-semibold mb-0.5">Soft Skills</strong>
+                      <p className="font-light text-zinc-500">{skills.soft.join(', ')}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <span className="text-zinc-400 font-light italic text-[10px]">no skills or keywords added yet.</span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -492,87 +562,121 @@ export default function ResumeTemplates({ resumeData, templateId }) {
       </div>
 
       {/* Summary */}
-      {personalInfo.professionalSummary && (
+      {(personalInfo.professionalSummary || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1.5">Executive Summary</h2>
-          <p className="text-gray-700 leading-normal">{personalInfo.professionalSummary}</p>
+          {personalInfo.professionalSummary ? (
+            <p className="text-gray-750 leading-normal">{personalInfo.professionalSummary}</p>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-gray-300 text-gray-400 text-[10px] italic rounded">
+              No summary provided.
+            </div>
+          )}
         </div>
       )}
 
       {/* Experience */}
-      {experience.length > 0 && (
+      {(hasExperience || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2.5">Professional Experience</h2>
-          <div className="space-y-4">
-            {experience.map((exp) => (
-              <div key={exp.id} className="group">
-                <div className="flex justify-between items-baseline font-bold text-gray-900">
-                  <span>{exp.jobTitle} | <span className="text-blue-800 font-semibold">{exp.company}</span></span>
-                  <span className="text-[10px] font-normal text-gray-500">{exp.startDate} – {exp.endDate || 'Present'}</span>
+          {hasExperience ? (
+            <div className="space-y-4">
+              {experience.map((exp) => (
+                <div key={exp.id} className={getDraftClass(exp.isDraft)}>
+                  <div className="flex justify-between items-baseline font-bold text-gray-900">
+                    <span>{exp.jobTitle || 'Role'} | <span className="text-blue-800 font-semibold">{exp.company || 'Company'}</span></span>
+                    <span className="text-[10px] font-normal text-gray-500">{exp.startDate} – {exp.endDate || 'Present'}</span>
+                  </div>
+                  {exp.location && <p className="text-[10px] text-gray-400 -mt-0.5">{exp.location}</p>}
+                  <ul className="list-disc pl-4 mt-1.5 space-y-1 text-gray-600">
+                    {exp.responsibilities && exp.responsibilities.split('\n').filter(Boolean).map((line, idx) => (
+                      <li key={idx}>{line}</li>
+                    ))}
+                    {exp.achievements && (
+                      <li className="list-none font-bold text-gray-800 mt-1 pl-0">Significant Achievement: {exp.achievements}</li>
+                    )}
+                  </ul>
                 </div>
-                {exp.location && <p className="text-[10px] text-gray-400 -mt-0.5">{exp.location}</p>}
-                <ul className="list-disc pl-4 mt-1.5 space-y-1 text-gray-600">
-                  {exp.responsibilities && exp.responsibilities.split('\n').map((line, idx) => (
-                    <li key={idx}>{line}</li>
-                  ))}
-                  {exp.achievements && (
-                    <li className="list-none font-bold text-gray-800 mt-1 pl-0">Significant Achievement: {exp.achievements}</li>
-                  )}
-                </ul>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-gray-300 text-gray-400 text-[10px] italic rounded">
+              No work experience added. Use form controls to add.
+            </div>
+          )}
         </div>
       )}
 
       {/* Education */}
-      {education.length > 0 && (
+      {(hasEducation || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Education</h2>
-          <div className="space-y-2">
-            {education.map((edu) => (
-              <div key={edu.id} className="flex justify-between items-baseline">
-                <div>
-                  <span className="font-bold text-gray-900">{edu.degree}</span>
-                  <span className="text-gray-500"> — {edu.institution}</span>
+          {hasEducation ? (
+            <div className="space-y-2">
+              {education.map((edu) => (
+                <div key={edu.id} className={getDraftClass(edu.isDraft)}>
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="font-bold text-gray-900">{edu.degree || 'Degree'}</span>
+                      <span className="text-gray-500"> — {edu.institution || 'School'}</span>
+                    </div>
+                    <span className="text-[10px] text-gray-500">{edu.startDate} – {edu.endDate} {edu.gpa && `(GPA: ${edu.gpa})`}</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-gray-500">{edu.startDate} – {edu.endDate} {edu.gpa && `(GPA: ${edu.gpa})`}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-gray-300 text-gray-400 text-[10px] italic rounded">
+              No education credentials added.
+            </div>
+          )}
         </div>
       )}
 
       {/* Projects */}
-      {projects.length > 0 && (
+      {(hasProjects || isBuilderMode) && (
         <div className="mb-5">
           <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Key Projects</h2>
-          <div className="space-y-3">
-            {projects.map((proj) => (
-              <div key={proj.id}>
-                <div className="flex justify-between items-baseline font-bold text-gray-900">
-                  <span>{proj.projectName}</span>
-                  <span className="text-[9.5px] font-normal text-gray-500">{proj.technologies?.join(', ')}</span>
+          {hasProjects ? (
+            <div className="space-y-3">
+              {projects.map((proj) => (
+                <div key={proj.id} className={getDraftClass(proj.isDraft)}>
+                  <div className="flex justify-between items-baseline font-bold text-gray-900">
+                    <span>{proj.projectName || 'Project Name'}</span>
+                    <span className="text-[9.5px] font-normal text-gray-500">{proj.technologies?.join(', ')}</span>
+                  </div>
+                  {proj.description && <p className="text-gray-650 mt-1">{proj.description}</p>}
                 </div>
-                <p className="text-gray-600 mt-1">{proj.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-gray-300 text-gray-400 text-[10px] italic rounded">
+              No projects added.
+            </div>
+          )}
         </div>
       )}
 
       {/* Skills */}
-      <div>
-        <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1.5">Skills & Expertise</h2>
-        <div className="grid grid-cols-2 gap-3 text-gray-700">
-          {skills.technical?.length > 0 && (
-            <p><strong>Technical Skills:</strong> {skills.technical.join(', ')}</p>
-          )}
-          {skills.soft?.length > 0 && (
-            <p><strong>Management & Soft:</strong> {skills.soft.join(', ')}</p>
+      {(hasSkills || isBuilderMode) && (
+        <div>
+          <h2 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1.5">Skills & Expertise</h2>
+          {hasSkills ? (
+            <div className="grid grid-cols-2 gap-3 text-gray-700">
+              {skills.technical?.length > 0 && (
+                <p><strong>Technical Skills:</strong> {skills.technical.join(', ')}</p>
+              )}
+              {skills.soft?.length > 0 && (
+                <p><strong>Management & Soft:</strong> {skills.soft.join(', ')}</p>
+              )}
+            </div>
+          ) : (
+            <div className="py-2 px-3 border border-dashed border-gray-300 text-gray-400 text-[10px] italic rounded">
+              No skills added.
+            </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -592,84 +696,118 @@ export default function ResumeTemplates({ resumeData, templateId }) {
       </div>
 
       {/* Summary */}
-      {personalInfo.professionalSummary && (
+      {(personalInfo.professionalSummary || isBuilderMode) && (
         <div className="mb-5">
           <span className="text-zinc-500 block mb-1"># about_me</span>
-          <p className="text-zinc-350">{personalInfo.professionalSummary}</p>
+          {personalInfo.professionalSummary ? (
+            <p className="text-zinc-350">{personalInfo.professionalSummary}</p>
+          ) : (
+            <div className="text-zinc-650 text-[10px] italic">
+              // summary is empty. start typing...
+            </div>
+          )}
         </div>
       )}
 
       {/* Skills */}
-      <div className="mb-5 border border-zinc-800/80 p-3 rounded-lg bg-zinc-900/40">
-        <span className="text-zinc-500 block mb-1"># core_skills</span>
-        <div className="space-y-1 text-[10px]">
-          {skills.technical?.length > 0 && (
-            <p><span className="text-emerald-400 font-bold">techStack</span> = [{skills.technical.map(s => `"${s}"`).join(', ')}]</p>
-          )}
-          {skills.soft?.length > 0 && (
-            <p><span className="text-emerald-400 font-bold">softSkills</span> = [{skills.soft.map(s => `"${s}"`).join(', ')}]</p>
-          )}
-          {skills.languages?.length > 0 && (
-            <p><span className="text-emerald-400 font-bold">languages</span> = [{skills.languages.map(s => `"${s}"`).join(', ')}]</p>
+      {(hasSkills || isBuilderMode) && (
+        <div className="mb-5 border border-zinc-800/80 p-3 rounded-lg bg-zinc-900/40">
+          <span className="text-zinc-500 block mb-1"># core_skills</span>
+          {hasSkills ? (
+            <div className="space-y-1 text-[10px]">
+              {skills.technical?.length > 0 && (
+                <p><span className="text-emerald-400 font-bold">techStack</span> = [{skills.technical.map(s => `"${s}"`).join(', ')}]</p>
+              )}
+              {skills.soft?.length > 0 && (
+                <p><span className="text-emerald-400 font-bold">softSkills</span> = [{skills.soft.map(s => `"${s}"`).join(', ')}]</p>
+              )}
+              {skills.languages?.length > 0 && (
+                <p><span className="text-emerald-400 font-bold">languages</span> = [{skills.languages.map(s => `"${s}"`).join(', ')}]</p>
+              )}
+            </div>
+          ) : (
+            <div className="text-zinc-600 text-[10px] italic">
+              // no skills records registered.
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Experience */}
-      {experience.length > 0 && (
+      {(hasExperience || isBuilderMode) && (
         <div className="mb-5">
           <span className="text-zinc-500 block mb-2"># experience_log</span>
-          <div className="space-y-3">
-            {experience.map((exp) => (
-              <div key={exp.id} className="pl-3 border-l border-zinc-800">
-                <div className="flex justify-between items-baseline text-white">
-                  <span className="font-bold">&gt;&gt; {exp.jobTitle} @ {exp.company}</span>
-                  <span className="text-[10px] text-zinc-500">{exp.startDate} - {exp.endDate || 'present'}</span>
+          {hasExperience ? (
+            <div className="space-y-3">
+              {experience.map((exp) => (
+                <div key={exp.id} className={getDraftClass(exp.isDraft, true) + " pl-3 border-l border-zinc-800"}>
+                  <div className="flex justify-between items-baseline text-white">
+                    <span className="font-bold">&gt;&gt; {exp.jobTitle || 'Title'} @ {exp.company || 'Company'}</span>
+                    <span className="text-[10px] text-zinc-500">{exp.startDate} - {exp.endDate || 'present'}</span>
+                  </div>
+                  <div className="mt-1 text-zinc-400 space-y-0.5">
+                    {exp.responsibilities && exp.responsibilities.split('\n').filter(Boolean).map((line, idx) => (
+                      <p key={idx}>* {line}</p>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-1 text-zinc-400 space-y-0.5">
-                  {exp.responsibilities && exp.responsibilities.split('\n').map((line, idx) => (
-                    <p key={idx}>* {line}</p>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-zinc-600 text-[10px] italic">
+              // experience log is empty. start typing...
+            </div>
+          )}
         </div>
       )}
 
       {/* Projects */}
-      {projects.length > 0 && (
+      {(hasProjects || isBuilderMode) && (
         <div className="mb-5">
           <span className="text-zinc-500 block mb-2"># project_portfolio</span>
-          <div className="space-y-3">
-            {projects.map((proj) => (
-              <div key={proj.id} className="pl-3 border-l border-zinc-800">
-                <div className="flex justify-between items-baseline text-white">
-                  <span>&gt;&gt; {proj.projectName}</span>
-                  {proj.githubLink && <a href={proj.githubLink} className="text-zinc-500 hover:text-emerald-400 text-[10px]">url</a>}
+          {hasProjects ? (
+            <div className="space-y-3">
+              {projects.map((proj) => (
+                <div key={proj.id} className={getDraftClass(proj.isDraft, true) + " pl-3 border-l border-zinc-800"}>
+                  <div className="flex justify-between items-baseline text-white">
+                    <span>&gt;&gt; {proj.projectName || 'Project'}</span>
+                    {proj.githubLink && <a href={proj.githubLink} className="text-zinc-500 hover:text-emerald-400 text-[10px]">url</a>}
+                  </div>
+                  {proj.technologies && proj.technologies.length > 0 && (
+                    <p className="text-[10px] text-zinc-500 mt-0.5">deps: {proj.technologies.join(', ')}</p>
+                  )}
+                  {proj.description && <p className="text-zinc-400 mt-1">{proj.description}</p>}
                 </div>
-                {proj.technologies && (
-                  <p className="text-[10px] text-zinc-500 mt-0.5">deps: {proj.technologies.join(', ')}</p>
-                )}
-                <p className="text-zinc-450 mt-1">{proj.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-zinc-650 text-[10px] italic">
+              // projects list is empty. start typing...
+            </div>
+          )}
         </div>
       )}
 
       {/* Education */}
-      {education.length > 0 && (
+      {(hasEducation || isBuilderMode) && (
         <div>
           <span className="text-zinc-500 block mb-2"># education_credentials</span>
-          <div className="space-y-2">
-            {education.map((edu) => (
-              <div key={edu.id} className="flex justify-between">
-                <span>{edu.degree} | {edu.institution}</span>
-                <span className="text-zinc-500">{edu.startDate} - {edu.endDate} {edu.gpa && `(GPA: ${edu.gpa})`}</span>
-              </div>
-            ))}
-          </div>
+          {hasEducation ? (
+            <div className="space-y-2">
+              {education.map((edu) => (
+                <div key={edu.id} className={getDraftClass(edu.isDraft, true)}>
+                  <div className="flex justify-between">
+                    <span>{edu.degree || 'Degree'} | {edu.institution || 'School'}</span>
+                    <span className="text-zinc-500">{edu.startDate} - {edu.endDate} {edu.gpa && `(GPA: ${edu.gpa})`}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-zinc-600 text-[10px] italic">
+              // education records empty.
+            </div>
+          )}
         </div>
       )}
     </div>
