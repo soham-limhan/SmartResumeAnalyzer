@@ -53,15 +53,15 @@ export default function ResumeBuilderPage() {
   const { user, getToken } = useAuth();
   const [activeStep, setActiveStep] = useState(1);
   const [resumeData, setResumeData] = useState(INITIAL_RESUME_STATE);
-  
+
   // Local states for list addition
   const [eduForm, setEduForm] = useState({ degree: '', institution: '', startDate: '', endDate: '', gpa: '', description: '' });
   const [expForm, setExpForm] = useState({ jobTitle: '', company: '', location: '', startDate: '', endDate: '', current: false, responsibilities: '', achievements: '' });
   const [projForm, setProjForm] = useState({ projectName: '', description: '', technologies: '', githubLink: '', liveDemoLink: '' });
-  
+
   // Local state for tags input
   const [tagInputs, setTagInputs] = useState({ technical: '', soft: '', languages: '', certifications: '' });
-  
+
   const [saving, setSaving] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
@@ -273,7 +273,7 @@ export default function ResumeBuilderPage() {
 
   const addProject = () => {
     if (!projForm.projectName || !projForm.description) return;
-    
+
     // Parse comma-separated technologies to list
     const techList = projForm.technologies
       ? projForm.technologies.split(',').map(t => t.trim()).filter(Boolean)
@@ -282,10 +282,10 @@ export default function ResumeBuilderPage() {
     setResumeData(prev => {
       const updated = {
         ...prev,
-        projects: [...prev.projects, { 
-          ...projForm, 
+        projects: [...prev.projects, {
+          ...projForm,
           technologies: techList,
-          id: Math.random().toString(36).substring(2, 9) 
+          id: Math.random().toString(36).substring(2, 9)
         }]
       };
       syncToDatabase(updated);
@@ -311,7 +311,7 @@ export default function ResumeBuilderPage() {
       e.preventDefault();
       const val = tagInputs[category].trim();
       if (!val) return;
-      
+
       // Prevent duplicates
       if (resumeData.skills[category].includes(val)) {
         setTagInputs(prev => ({ ...prev, [category]: '' }));
@@ -379,7 +379,7 @@ export default function ResumeBuilderPage() {
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     const resumeHTML = document.getElementById('resume-print-box')?.innerHTML || '';
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -482,7 +482,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">Full Name</label>
                       <Input
-                        placeholder="John Doe"
+                        placeholder="Your Name"
                         value={resumeData.personalInfo.fullName}
                         onChange={e => handlePersonalInfoChange('fullName', e.target.value)}
                       />
@@ -490,7 +490,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">Professional Title</label>
                       <Input
-                        placeholder="Senior Software Engineer"
+                        placeholder="Your Title"
                         value={resumeData.personalInfo.professionalTitle}
                         onChange={e => handlePersonalInfoChange('professionalTitle', e.target.value)}
                       />
@@ -499,7 +499,7 @@ export default function ResumeBuilderPage() {
                       <label className="text-xs font-bold text-muted-foreground">Email Address</label>
                       <Input
                         type="email"
-                        placeholder="john.doe@example.com"
+                        placeholder="Your email address"
                         value={resumeData.personalInfo.email}
                         onChange={e => handlePersonalInfoChange('email', e.target.value)}
                       />
@@ -507,7 +507,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">Phone Number</label>
                       <Input
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="Your phone number"
                         value={resumeData.personalInfo.phone}
                         onChange={e => handlePersonalInfoChange('phone', e.target.value)}
                       />
@@ -515,7 +515,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">Location</label>
                       <Input
-                        placeholder="San Francisco, CA"
+                        placeholder="Location"
                         value={resumeData.personalInfo.location}
                         onChange={e => handlePersonalInfoChange('location', e.target.value)}
                       />
@@ -523,7 +523,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">LinkedIn Username/Link</label>
                       <Input
-                        placeholder="linkedin.com/in/johndoe"
+                        placeholder="linkedin.com/in/"
                         value={resumeData.personalInfo.linkedin}
                         onChange={e => handlePersonalInfoChange('linkedin', e.target.value)}
                       />
@@ -531,7 +531,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">GitHub Username/Link</label>
                       <Input
-                        placeholder="github.com/johndoe"
+                        placeholder="github.com/name"
                         value={resumeData.personalInfo.github}
                         onChange={e => handlePersonalInfoChange('github', e.target.value)}
                       />
@@ -539,7 +539,7 @@ export default function ResumeBuilderPage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-muted-foreground">Portfolio Website</label>
                       <Input
-                        placeholder="johndoe.dev"
+                        placeholder="name.dev"
                         value={resumeData.personalInfo.portfolioWebsite}
                         onChange={e => handlePersonalInfoChange('portfolioWebsite', e.target.value)}
                       />
@@ -561,7 +561,7 @@ export default function ResumeBuilderPage() {
               {activeStep === 2 && (
                 <div className="space-y-5">
                   <h3 className="text-sm font-bold border-b border-border pb-1.5 uppercase tracking-wider text-muted-foreground">Education Credentials</h3>
-                  
+
                   {/* List of educations */}
                   {resumeData.education.length > 0 && (
                     <div className="space-y-2.5">
@@ -599,7 +599,7 @@ export default function ResumeBuilderPage() {
               {activeStep === 3 && (
                 <div className="space-y-5">
                   <h3 className="text-sm font-bold border-b border-border pb-1.5 uppercase tracking-wider text-muted-foreground">Work Experience</h3>
-                  
+
                   {/* List of experiences */}
                   {resumeData.experience.length > 0 && (
                     <div className="space-y-2.5">
@@ -665,7 +665,7 @@ export default function ResumeBuilderPage() {
                   ].map(cat => (
                     <div key={cat.key} className="space-y-2.5">
                       <label className="text-xs font-bold text-foreground block">{cat.label}</label>
-                      
+
                       {/* Render tags */}
                       <div className="flex flex-wrap gap-1.5">
                         {resumeData.skills[cat.key]?.map(tag => (
@@ -692,7 +692,7 @@ export default function ResumeBuilderPage() {
               {activeStep === 5 && (
                 <div className="space-y-5">
                   <h3 className="text-sm font-bold border-b border-border pb-1.5 uppercase tracking-wider text-muted-foreground">Project Portfolio</h3>
-                  
+
                   {/* List of projects */}
                   {resumeData.projects.length > 0 && (
                     <div className="space-y-2.5">
@@ -734,7 +734,7 @@ export default function ResumeBuilderPage() {
               {activeStep === 6 && (
                 <div className="space-y-6">
                   <h3 className="text-sm font-bold border-b border-border pb-1.5 uppercase tracking-wider text-muted-foreground">Select Resume Design Template</h3>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { id: 'modern_professional', label: 'Modern Professional', desc: 'Clean sans-serif fonts with elegant blue headers' },
@@ -760,7 +760,7 @@ export default function ResumeBuilderPage() {
                   {/* Actions summary */}
                   <div className="border-t border-border pt-5 space-y-4">
                     <h4 className="text-xs font-bold uppercase tracking-wider">Export Actions</h4>
-                    
+
                     {error && (
                       <div className="text-xs text-red-500 flex items-center gap-1.5">
                         <AlertCircle className="w-4 h-4" /> {error}
@@ -820,26 +820,24 @@ export default function ResumeBuilderPage() {
               {resumeData.designTemplate}
             </Badge>
           </div>
-          
+
           {/* Page Budget selector (1 Page Fit vs 2 Pages) */}
           <div className="flex items-center gap-1 bg-muted/65 p-0.5 rounded-lg border border-border">
             <button
               onClick={() => setPageBudget(1)}
-              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${
-                pageBudget === 1
-                  ? 'bg-background text-foreground shadow-sm border border-border'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${pageBudget === 1
+                ? 'bg-background text-foreground shadow-sm border border-border'
+                : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               1 Page Fit
             </button>
             <button
               onClick={() => setPageBudget(2)}
-              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${
-                pageBudget === 2
-                  ? 'bg-background text-foreground shadow-sm border border-border'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all ${pageBudget === 2
+                ? 'bg-background text-foreground shadow-sm border border-border'
+                : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               2 Pages
             </button>
@@ -849,10 +847,10 @@ export default function ResumeBuilderPage() {
         {/* Outer scrolling preview wrapper */}
         <div className="border border-border rounded-xl bg-muted/30 p-3 overflow-auto max-h-[720px] shadow-sm flex items-center justify-center">
           <AutoSizedPreview pageBudget={pageBudget}>
-            <ResumeTemplates 
-              resumeData={previewResumeData} 
-              templateId={resumeData.designTemplate} 
-              isBuilderMode={true} 
+            <ResumeTemplates
+              resumeData={previewResumeData}
+              templateId={resumeData.designTemplate}
+              isBuilderMode={true}
             />
           </AutoSizedPreview>
         </div>
@@ -861,10 +859,10 @@ export default function ResumeBuilderPage() {
       {/* Hidden Container for Clean Print (No empty states or drafts) */}
       <div className="hidden">
         <div id="resume-print-box">
-          <ResumeTemplates 
-            resumeData={resumeData} 
-            templateId={resumeData.designTemplate} 
-            isBuilderMode={false} 
+          <ResumeTemplates
+            resumeData={resumeData}
+            templateId={resumeData.designTemplate}
+            isBuilderMode={false}
           />
         </div>
       </div>
