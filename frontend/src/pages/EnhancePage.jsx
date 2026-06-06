@@ -43,14 +43,14 @@ function StepIndicator({ currentStep }) {
               <motion.div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
                   ${isDone    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : ''}
-                  ${isCurrent ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/30' : ''}
+                  ${isCurrent ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : ''}
                   ${isAfter   ? 'bg-white/5 text-muted-foreground/40 border border-white/8' : ''}`}
                 layout
               >
                 {isDone ? <CheckCircle2 className="w-4 h-4" /> : step.id}
               </motion.div>
               <span className={`text-[10px] font-medium whitespace-nowrap hidden sm:block
-                ${isCurrent ? 'text-indigo-400' : isDone ? 'text-emerald-400' : 'text-muted-foreground/40'}`}>
+                ${isCurrent ? 'text-primary' : isDone ? 'text-emerald-400' : 'text-muted-foreground/40'}`}>
                 {step.label}
               </span>
             </div>
@@ -232,8 +232,8 @@ export default function EnhancePage() {
         className="relative card-premium rounded-3xl overflow-hidden"
       >
         {/* Background glow */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-violet-500/10 pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
         <div className="relative px-6 py-5 flex items-center gap-4">
           <Button
@@ -245,7 +245,7 @@ export default function EnhancePage() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
 
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-xl shadow-indigo-500/30 flex-shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center shadow-md flex-shrink-0">
             <Sparkles className="w-5.5 h-5.5 text-white" />
           </div>
 
@@ -353,9 +353,7 @@ export default function EnhancePage() {
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2.5
-                bg-gradient-to-r from-indigo-500 to-violet-600 text-white
-                shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50
-                hover:from-indigo-600 hover:to-violet-700 transition-all"
+                bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
             >
               <Sparkles className="w-5 h-5" />
               Enhance Resume with AI
@@ -502,7 +500,7 @@ export default function EnhancePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <GlassCard hover={false} className="border-indigo-500/20 bg-indigo-500/5">
+              <GlassCard hover={false} className="border-border">
                 <DownloadPanel
                   enhancedResume={enhanced}
                   enhancementId={result?.id}
@@ -517,7 +515,7 @@ export default function EnhancePage() {
               <Button
                 id="scroll-download-btn"
                 onClick={() => setStep(4)}
-                className="rounded-xl gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40"
+                className="rounded-xl gap-2"
               >
                 <Download className="w-4 h-4" />
                 Go to Downloads

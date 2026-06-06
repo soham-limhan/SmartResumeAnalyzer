@@ -18,6 +18,7 @@ import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import EnhancePage from '@/pages/EnhancePage';
+import ResumeBuilderPage from '@/pages/ResumeBuilderPage';
 
 function DashboardLayout() {
   return (
@@ -50,6 +51,7 @@ function AnimatedRoutes() {
         {/* Dashboard pages — accessible to both guests and authenticated users */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UploadPage />} />
+          <Route path="/resume-builder" element={<ResumeBuilderPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/enhance/:id" element={<EnhancePage />} />
           <Route path="/batch-results" element={<BatchResultsPage />} />

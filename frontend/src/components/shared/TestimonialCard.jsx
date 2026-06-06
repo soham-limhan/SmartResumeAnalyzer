@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 /**
  * TestimonialCard — premium testimonial with quote, rating, avatar initials, and role.
  */
-export default function TestimonialCard({ name, role, company, quote, rating = 5, avatarColor = 'from-indigo-500 to-violet-600', index = 0 }) {
+export default function TestimonialCard({ name, role, company, quote, rating = 5, index = 0 }) {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
@@ -33,8 +33,8 @@ export default function TestimonialCard({ name, role, company, quote, rating = 5
 
       {/* Author */}
       <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-          <span className="text-xs font-bold text-white">{initials}</span>
+        <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+          <span className="text-xs font-bold text-primary">{initials}</span>
         </div>
         <div>
           <p className="text-sm font-semibold text-foreground">{name}</p>

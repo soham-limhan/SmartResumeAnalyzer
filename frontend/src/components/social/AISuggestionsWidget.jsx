@@ -68,11 +68,11 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
   const priority = recommendations?.priority_list || [];
 
   return (
-    <GlassCard hover={false} className="border-indigo-500/10 h-full flex flex-col">
+    <GlassCard hover={false} className="border-border h-full flex flex-col">
       {/* Widget Header */}
       <div className="flex items-center gap-2.5 mb-4 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
-          <Sparkles className="w-4.5 h-4.5 text-indigo-400" />
+        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Sparkles className="w-4.5 h-4.5 text-primary" />
         </div>
         <div>
           <h4 className="font-heading font-bold text-sm text-foreground">AI Connections Assistant</h4>
@@ -88,13 +88,13 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
             value={targetRole}
             onChange={(e) => setTargetRole(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runPresenceAudit()}
-            className="w-full bg-white/3 border border-white/10 rounded-xl text-xs py-1.5 h-9 placeholder:text-muted-foreground/30 focus:border-indigo-500/40"
+            className="w-full bg-white/3 border border-white/10 rounded-xl text-xs py-1.5 h-9 placeholder:text-muted-foreground/30 focus:border-primary/40"
           />
         </div>
         <Button
           onClick={runPresenceAudit}
           disabled={analyzing}
-          className="rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 py-1 h-9 px-3 flex items-center gap-1 text-xs"
+          className="rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 py-1 h-9 px-3 flex items-center gap-1 text-xs"
         >
           {analyzing ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -113,7 +113,7 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
             exit={{ opacity: 0 }}
             className="flex-1 flex flex-col items-center justify-center py-8 text-center text-muted-foreground/60 gap-3"
           >
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <div>
               <p className="text-xs font-bold text-foreground">Analyzing Profile Visibility</p>
               <p className="text-[10px] mt-0.5">Auditing profile relevance against job markets...</p>
@@ -143,7 +143,7 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
                   {score >= 80 ? 'Elite Visibility!' : score >= 60 ? 'Strong Presence' : 'Incomplete Presence'}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
-                  Your social link structure is {score}% optimized for <span className="text-indigo-400 font-semibold">{targetRole || 'General Professional'}</span> roles.
+                  Your social link structure is {score}% optimized for <span className="text-primary font-semibold">{targetRole || 'General Professional'}</span> roles.
                 </p>
               </div>
             </div>
@@ -161,12 +161,12 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
                       <button
                         key={platform}
                         onClick={() => onAddPlatform && onAddPlatform(platform)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] text-foreground font-semibold hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all group"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] text-foreground font-semibold hover:border-primary/30 hover:bg-primary/5 transition-all group"
                         title={`Click to add ${cfg.label}`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                         Add {cfg.label}
-                        <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </button>
                     );
                   })}
@@ -178,7 +178,7 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
             {suggestions.length > 0 && (
               <div className="space-y-1.5 pt-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 flex items-center gap-1">
-                  <Brain className="w-3.5 h-3.5 text-indigo-400" /> Optimization Tips
+                  <Brain className="w-3.5 h-3.5 text-primary" /> Optimization Tips
                 </p>
                 <ul className="space-y-2">
                   {suggestions.slice(0, 3).map((tip, idx) => (
@@ -193,8 +193,8 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
 
             {/* Recommended visual order badge */}
             {priority.length > 0 && (
-              <div className="p-2.5 rounded-xl bg-indigo-500/4 border border-indigo-500/10">
-                <span className="text-[9.5px] font-bold text-indigo-400 block mb-1">RECOMMENDED EXPORT PRIORITY</span>
+              <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/10">
+                <span className="text-[9.5px] font-bold text-primary block mb-1">RECOMMENDED EXPORT PRIORITY</span>
                 <span className="text-[10px] text-muted-foreground font-medium flex flex-wrap items-center gap-1 capitalize">
                   {priority.slice(0, 4).map((p, i) => (
                     <span key={p} className="flex items-center gap-1">

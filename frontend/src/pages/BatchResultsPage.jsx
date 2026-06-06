@@ -104,7 +104,7 @@ export default function BatchResultsPage() {
           icon="history"
           title="No Batch Results"
           description="Upload multiple resumes to see batch analysis results here."
-          action={<Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 rounded-xl">Upload Resumes</Button>}
+          action={<Button onClick={() => navigate('/dashboard')} className="rounded-xl">Upload Resumes</Button>}
         />
       </div>
     );
@@ -162,7 +162,7 @@ export default function BatchResultsPage() {
             </Button>
           )}
           {compareIds.length >= 2 && (
-            <Button size="sm" onClick={() => setShowCompare(true)} className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 text-xs">
+            <Button size="sm" onClick={() => setShowCompare(true)} className="rounded-xl text-xs">
               <Eye className="w-3.5 h-3.5 mr-1.5" />
               Compare ({compareIds.length})
             </Button>

@@ -64,7 +64,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Editor manager (Col 7) */}
             <div className="lg:col-span-7">
-              <GlassCard hover={false} className="border-indigo-500/10">
+              <GlassCard hover={false} className="border-border">
                 <SocialLinksManager onChange={handleSocialChange} />
               </GlassCard>
             </div>

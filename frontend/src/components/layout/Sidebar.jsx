@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Zap,
   LayoutDashboard,
+  FileText,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +26,7 @@ export default function Sidebar() {
 
   const navItems = [
     { to: '/dashboard', icon: Upload, label: 'Analyze', description: 'Upload & analyze resume' },
+    { to: '/resume-builder', icon: FileText, label: 'Resume Builder', description: 'Create a new resume' },
     ...(batchResults ? [{ to: '/batch-results', icon: ClipboardList, label: 'Batch Results', description: 'Multi-resume results' }] : []),
     { to: '/history', icon: History, label: 'History', description: 'Past analyses' },
     { to: '/settings', icon: Settings, label: 'Settings', description: 'Preferences' },
@@ -42,16 +44,16 @@ export default function Sidebar() {
 
   return (
     <motion.aside
-      className="hidden md:flex flex-col h-screen sticky top-0 z-40 border-r border-white/6"
+      className="hidden md:flex flex-col h-screen sticky top-0 z-40 border-r border-border"
       style={{ background: 'var(--sidebar)' }}
       animate={{ width: collapsed ? 72 : 248 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {/* ── Logo ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/6 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-border flex-shrink-0">
         <button
           onClick={() => navigate('/')}
-          className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/25 hover:scale-105 transition-transform"
+          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm hover:scale-105 transition-transform"
         >
           <Sparkles className="w-4.5 h-4.5 text-white" />
         </button>
@@ -63,8 +65,8 @@ export default function Sidebar() {
               exit={{ opacity: 0, width: 0 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <span className="font-heading font-bold text-base bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                ResumePilot
+              <span className="font-heading font-bold text-base text-foreground">
+                SmartResume
               </span>
               <p className="text-[10px] text-muted-foreground font-medium -mt-0.5">AI Resume Intelligence</p>
             </motion.div>
@@ -95,8 +97,8 @@ export default function Sidebar() {
               <motion.div
                 className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group
                   ${isActive
-                    ? 'text-white'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    ? 'text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   }`}
                 whileHover={{ x: isActive ? 0 : 2 }}
                 whileTap={{ scale: 0.98 }}
@@ -104,7 +106,7 @@ export default function Sidebar() {
                 {/* Active background */}
                 {isActive && (
                   <motion.div
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/90 to-violet-600/90 shadow-lg shadow-indigo-500/20"
+                    className="absolute inset-0 rounded-xl bg-primary shadow-sm"
                     layoutId="sidebar-active"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
@@ -145,7 +147,7 @@ export default function Sidebar() {
       </nav>
 
       {/* ── User + Plan section ───────────────────────────────── */}
-      <div className="p-3 border-t border-white/6 space-y-2 flex-shrink-0">
+      <div className="p-3 border-t border-border space-y-2 flex-shrink-0">
         {/* Plan badge (non-collapsed) */}
         <AnimatePresence>
           {!collapsed && (
@@ -155,10 +157,10 @@ export default function Sidebar() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex items-center justify-start px-3 py-2 rounded-xl bg-indigo-500/8 border border-indigo-500/15">
+              <div className="flex items-center justify-start px-3 py-2 rounded-xl bg-muted border border-border">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="text-xs font-semibold text-indigo-400">Free Plan</span>
+                  <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
+                  <span className="text-xs font-semibold text-muted-foreground">Free Plan</span>
                 </div>
               </div>
             </motion.div>
@@ -167,15 +169,15 @@ export default function Sidebar() {
 
         {/* User card */}
         {user && (
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-secondary transition-colors">
             {user.picture ? (
               <img
                 src={user.picture}
                 alt={user.name}
-                className="w-8 h-8 rounded-full flex-shrink-0 ring-1 ring-white/10"
+                className="w-8 h-8 rounded-full flex-shrink-0 ring-1 ring-border"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white shadow-md">
+              <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
                 {initials}
               </div>
             )}
@@ -219,7 +221,7 @@ export default function Sidebar() {
         ) : (
           <button
             onClick={() => navigate('/login')}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/8 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
             title={collapsed ? 'Sign In' : undefined}
           >
             <LogIn className="w-4 h-4 flex-shrink-0" />
@@ -241,7 +243,7 @@ export default function Sidebar() {
         {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center p-2 rounded-xl text-muted-foreground/50 hover:text-muted-foreground hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-center p-2 rounded-xl text-muted-foreground/50 hover:text-muted-foreground hover:bg-secondary transition-colors"
         >
           <motion.div animate={{ rotate: collapsed ? 0 : 180 }} transition={{ duration: 0.3 }}>
             <ChevronRight className="w-4 h-4" />

@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const routeMeta = {
   '/dashboard': { title: 'Analyze Resume', breadcrumb: ['Dashboard', 'Analyze'] },
+  '/resume-builder': { title: 'Resume Builder', breadcrumb: ['Dashboard', 'Resume Builder'] },
   '/analysis': { title: 'Analysis Results', breadcrumb: ['Dashboard', 'Results'] },
   '/batch-results': { title: 'Batch Results', breadcrumb: ['Dashboard', 'Batch'] },
   '/history': { title: 'History', breadcrumb: ['Dashboard', 'History'] },
@@ -21,18 +22,18 @@ export default function Header() {
   const matchedKey = Object.keys(routeMeta).find(k =>
     k === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(k)
   );
-  const meta = routeMeta[matchedKey] || { title: 'ResumePilot', breadcrumb: ['Dashboard'] };
+  const meta = routeMeta[matchedKey] || { title: 'SmartResume', breadcrumb: ['Dashboard'] };
   const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'G';
 
   return (
-    <header className="sticky top-0 z-30 glass-strong border-b border-white/6">
+    <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border">
       <div className="flex items-center justify-between px-5 py-3 gap-4">
         {/* Left: Mobile logo + Breadcrumb */}
         <div className="flex items-center gap-3">
           {/* Mobile logo */}
           <button
             onClick={() => navigate('/')}
-            className="md:hidden w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 shadow-md"
+            className="md:hidden w-8 h-8 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm"
           >
             <Sparkles className="w-4 h-4 text-white" />
           </button>
@@ -57,7 +58,7 @@ export default function Header() {
           {/* Theme toggle */}
           <motion.button
             onClick={toggleTheme}
-            className="p-2 rounded-xl hover:bg-white/8 text-muted-foreground hover:text-foreground transition-colors"
+            className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Toggle theme"
@@ -68,14 +69,14 @@ export default function Header() {
           {/* User avatar */}
           <motion.button
             onClick={() => navigate('/settings')}
-            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-white/8 transition-colors"
+            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-muted transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             {user?.picture ? (
-              <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full ring-1 ring-white/15" />
+              <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full ring-1 ring-border" />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-[11px] font-bold text-white shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-[11px] font-bold shadow-sm">
                 {initials}
               </div>
             )}
@@ -87,9 +88,10 @@ export default function Header() {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden flex border-t border-white/6">
+      <nav className="md:hidden flex border-t border-border">
         {[
           { to: '/dashboard', label: 'Analyze' },
+          { to: '/resume-builder', label: 'Builder' },
           { to: '/history', label: 'History' },
           { to: '/settings', label: 'Settings' },
         ].map(({ to, label }) => {
@@ -99,13 +101,13 @@ export default function Header() {
               key={to}
               onClick={() => navigate(to)}
               className={`flex-1 py-2.5 text-[11px] font-semibold text-center transition-colors relative ${
-                isActive ? 'text-indigo-400' : 'text-muted-foreground hover:text-foreground'
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {label}
               {isActive && (
                 <motion.div
-                  className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                  className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full"
                   layoutId="mobile-nav-active"
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />

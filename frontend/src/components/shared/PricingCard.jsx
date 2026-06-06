@@ -20,7 +20,7 @@ export default function PricingCard({
     <motion.div
       className={`relative rounded-2xl p-7 border flex flex-col gap-6 transition-all duration-300
         ${highlighted
-          ? 'pricing-highlight border-indigo-500/40 shadow-2xl shadow-indigo-500/10'
+          ? 'pricing-highlight border-primary/50 shadow-xl shadow-primary/5'
           : 'glass border-white/8'
         }`}
       initial={{ opacity: 0, y: 30 }}
@@ -32,7 +32,7 @@ export default function PricingCard({
       {/* Popular badge */}
       {badge && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/30">
+          <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-sm">
             <Sparkles className="w-3 h-3" />
             {badge}
           </div>
@@ -79,7 +79,7 @@ export default function PricingCard({
         onClick={onSelect}
         className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200
           ${highlighted
-            ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5'
+            ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5'
             : 'bg-white/8 text-foreground hover:bg-white/12 border border-white/10'
           }`}
       >

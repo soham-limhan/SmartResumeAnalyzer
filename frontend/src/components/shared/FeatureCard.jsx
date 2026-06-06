@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 /**
  * FeatureCard — premium feature card with icon, title, description and hover effects.
  */
-export default function FeatureCard({ icon: Icon, title, description, gradient = 'from-indigo-500 to-violet-500', index = 0 }) {
+export default function FeatureCard({ icon: Icon, title, description, index = 0 }) {
   return (
     <motion.div
       className="feature-card glass rounded-2xl p-6 cursor-default border border-white/8"
@@ -14,10 +14,8 @@ export default function FeatureCard({ icon: Icon, title, description, gradient =
       whileHover={{ y: -6 }}
     >
       {/* Icon */}
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} p-0.5 mb-5 shadow-lg`}>
-        <div className="w-full h-full rounded-xl bg-background/80 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" style={{ color: 'oklch(0.75 0.2 264)' }} />
-        </div>
+      <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
+        <Icon className="w-5 h-5 text-primary" />
       </div>
 
       {/* Content */}
@@ -29,7 +27,7 @@ export default function FeatureCard({ icon: Icon, title, description, gradient =
       </p>
 
       {/* Bottom accent */}
-      <div className={`mt-5 h-0.5 w-8 rounded-full bg-gradient-to-r ${gradient} opacity-60`} />
+      <div className="mt-5 h-0.5 w-8 rounded-full bg-primary/60" />
     </motion.div>
   );
 }

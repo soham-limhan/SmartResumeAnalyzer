@@ -120,7 +120,7 @@ export default function RegisterPage() {
       >
         <div className="glass-strong rounded-3xl p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-heading font-bold">Create Account</h1>
@@ -243,7 +243,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={loading || !allPasswordRulesPassed || !isEmailValid || !name.trim()}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 py-5 rounded-xl disabled:opacity-50"
+              className="w-full py-5 rounded-xl disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create Account'} <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

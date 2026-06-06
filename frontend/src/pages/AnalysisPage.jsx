@@ -150,8 +150,8 @@ export default function AnalysisPage() {
         transition={{ duration: 0.5 }}
       >
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-violet-500/8 pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
         <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 p-6 md:p-8">
           {/* Back button + file info */}
@@ -209,7 +209,7 @@ export default function AnalysisPage() {
               <Button
                 size="sm"
                 onClick={() => navigate(`/enhance/${id}`, { state: { analysis: data } })}
-                className="rounded-xl gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:from-indigo-600 hover:to-violet-700 font-semibold border-0"
+                className="rounded-xl gap-2 font-semibold"
                 id="enhance-resume-btn"
               >
                 <Wand2 className="w-3.5 h-3.5" />
@@ -222,7 +222,7 @@ export default function AnalysisPage() {
               size="sm"
               onClick={handleExport}
               disabled={exporting}
-              className="rounded-xl glass border-white/12 gap-2 hover:border-indigo-500/30 hover:bg-indigo-500/5"
+              className="rounded-xl gap-2"
             >
               {exporting ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating...</>
@@ -431,11 +431,11 @@ export default function AnalysisPage() {
             transition={{ delay: 0.5 }}
             className="mt-4"
           >
-            <GlassCard hover={false} className="border-indigo-500/10 bg-gradient-to-br from-indigo-500/3 via-transparent to-violet-500/3 p-6">
+            <GlassCard hover={false} className="border-border p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-5 h-5 text-indigo-400" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <h3 className="font-heading font-bold text-sm text-foreground">AI Social Presence Audit</h3>
@@ -444,7 +444,7 @@ export default function AnalysisPage() {
                 </div>
                 <Button
                   onClick={() => navigate('/settings')}
-                  className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 text-xs py-1.5 h-auto px-4"
+                  className="rounded-xl text-xs py-1.5 h-auto px-4"
                 >
                   Manage Connections
                 </Button>
@@ -479,13 +479,13 @@ export default function AnalysisPage() {
                 <div className="sm:col-span-4 p-4 rounded-2xl bg-white/3 border border-white/6 flex items-center justify-between gap-4">
                   <div>
                     <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-wider block">Completeness</span>
-                    <p className="text-2xl font-heading font-bold text-indigo-400 mt-0.5">
+                    <p className="text-2xl font-heading font-bold text-primary mt-0.5">
                       {Math.min(100, activeSocialLinks.length * 25)}%
                     </p>
                   </div>
                   <div className="flex-grow max-w-[120px] h-2.5 rounded-full bg-white/10 overflow-hidden relative">
                     <div 
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full transition-all duration-500" 
+                      className="h-full bg-primary rounded-full transition-all duration-500" 
                       style={{ width: `${Math.min(100, activeSocialLinks.length * 25)}%` }} 
                     />
                   </div>
@@ -626,7 +626,7 @@ export default function AnalysisPage() {
                             </div>
                             <Button
                               onClick={() => handleGenerateAnswer(questionText)}
-                              className="rounded-xl flex-shrink-0 gap-1.5 text-xs py-1.5 h-auto px-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35"
+                              className="rounded-xl flex-shrink-0 gap-1.5 text-xs py-1.5 h-auto px-4"
                             >
                               <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
                               Generate with AI
@@ -646,14 +646,14 @@ export default function AnalysisPage() {
         <TabsContent value="recruiter">
           <GlassCard hover={false}>
             <div className="flex items-center gap-2 mb-5">
-              <Briefcase className="w-4 h-4 text-indigo-400" />
+              <Briefcase className="w-4 h-4 text-primary" />
               <h3 className="font-heading font-bold text-sm">Recruiter Perspective</h3>
             </div>
 
             <div className="flex items-start gap-4">
               {/* Recruiter avatar */}
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-md">
                   <Briefcase className="w-5 h-5 text-white" />
                 </div>
                 <p className="text-[10px] text-center text-muted-foreground mt-1.5 font-medium">Sr. Recruiter</p>

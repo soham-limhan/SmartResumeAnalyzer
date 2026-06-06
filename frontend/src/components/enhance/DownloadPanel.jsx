@@ -107,13 +107,13 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
     <div className="space-y-5">
       {/* Header Panel */}
       <div className="flex items-center gap-3 mb-1">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md flex-shrink-0">
           <Download className="w-4.5 h-4.5 text-white" />
         </div>
         <div>
           <h3 className="text-sm font-heading font-bold text-foreground">Download Enhanced Resume</h3>
           <p className="text-xs text-muted-foreground">
-            Mode: <span className="text-indigo-400 font-medium">{modeLabels[mode] || mode}</span>
+            Mode: <span className="text-primary font-medium">{modeLabels[mode] || mode}</span>
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/12 border border-emerald-500/20">
@@ -127,10 +127,10 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
         <div className="p-3 rounded-2xl bg-white/3 border border-white/6 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10.5px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Share2 className="w-3.5 h-3.5 text-indigo-400" />
+              <Share2 className="w-3.5 h-3.5 text-primary" />
               Social Link Export Format
             </span>
-            <Badge variant="secondary" className="text-[9.5px] font-semibold px-2 py-0.5 rounded-lg border-white/6 bg-white/5 text-indigo-400">
+            <Badge variant="secondary" className="text-[9.5px] font-semibold px-2 py-0.5 rounded-lg border-white/6 bg-white/5 text-primary">
               {activeLinks.length} Links Active
             </Badge>
           </div>
@@ -151,7 +151,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
                 }}
                 className={`py-1.5 px-2 rounded-lg border text-[10.5px] font-bold transition-all text-center
                   ${exportMode === m.id
-                    ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 shadow-md'
+                    ? 'border-primary/30 bg-primary/10 text-primary shadow-sm'
                     : 'border-white/6 bg-white/2 text-muted-foreground/60 hover:text-foreground'}`}
               >
                 {m.label}
@@ -168,7 +168,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
             {/* compact mockup */}
             {exportMode === 'compact' && (
               <div className="flex items-center gap-1.5 text-[8.5px] text-white/70 font-mono">
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-indigo-500/50 text-[6px] text-white font-bold">LI</span>
+                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-primary/50 text-[6px] text-white font-bold">LI</span>
                 <span>LinkedIn</span>
                 <span className="text-white/20">|</span>
                 <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-800 text-[6px] text-white font-bold">GH</span>
@@ -180,7 +180,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
             {exportMode === 'expanded' && (
               <div className="grid grid-cols-2 gap-1.5 w-full max-w-[240px]">
                 <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 text-[7px] text-white/80 font-mono">
-                  <span className="inline-flex items-center justify-center w-2.5 h-2.5 rounded-full bg-indigo-500/50 text-[5px] text-white font-bold">LI</span>
+                  <span className="inline-flex items-center justify-center w-2.5 h-2.5 rounded-full bg-primary/50 text-[5px] text-white font-bold">LI</span>
                   <span className="truncate">LI: linkedin.com/in/...</span>
                 </div>
                 <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 text-[7px] text-white/80 font-mono">
@@ -218,8 +218,8 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
           disabled={pdfLoading}
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.97 }}
-          className="relative flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600
-            text-white font-semibold text-sm shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40
+          className="relative flex items-center gap-3 p-4 rounded-xl bg-primary
+            text-primary-foreground font-semibold text-sm shadow-md
             transition-all disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
@@ -251,20 +251,20 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.97 }}
           className="relative flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/12
-            text-foreground font-semibold text-sm hover:border-indigo-500/30 hover:bg-indigo-500/5
+            text-foreground font-semibold text-sm hover:border-primary/30 hover:bg-primary/5
             transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/4 to-transparent
             -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
           {docxLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-indigo-400 flex-shrink-0" />
+            <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
           ) : docxDone ? (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             </motion.div>
           ) : (
-            <FileType className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+            <FileType className="w-5 h-5 text-primary flex-shrink-0" />
           )}
 
           <div className="text-left">
@@ -300,8 +300,8 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
       {/* Explanatory labels */}
       <div className="grid grid-cols-2 gap-2 pt-1">
         {[
-          { label: 'PDF', note: 'Branded links will be fully clickable in exported PDF', color: 'text-indigo-400' },
-          { label: 'Word', note: 'Formatted hyperlinks will compile cleanly in DOCX layout', color: 'text-violet-400' },
+          { label: 'PDF', note: 'Branded links will be fully clickable in exported PDF', color: 'text-primary' },
+          { label: 'Word', note: 'Formatted hyperlinks will compile cleanly in DOCX layout', color: 'text-primary' },
         ].map((item) => (
           <div key={item.label} className="p-2.5 rounded-lg bg-white/2 border border-white/6">
             <p className={`text-[10px] font-bold ${item.color} mb-0.5`}>{item.label}</p>

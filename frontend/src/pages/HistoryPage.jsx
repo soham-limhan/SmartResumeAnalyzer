@@ -12,10 +12,10 @@ import { getHistory, deleteAnalysis } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 function getScoreColor(score) {
-  if (score >= 80) return 'bg-emerald-500/20 text-emerald-400';
-  if (score >= 60) return 'bg-blue-500/20 text-blue-400';
-  if (score >= 40) return 'bg-amber-500/20 text-amber-400';
-  return 'bg-red-500/20 text-red-400';
+  if (score >= 80) return 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400';
+  if (score >= 60) return 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400';
+  if (score >= 40) return 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400';
+  return 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400';
 }
 
 export default function HistoryPage() {
@@ -83,7 +83,7 @@ export default function HistoryPage() {
           className="glass rounded-xl p-4 flex items-center justify-between"
         >
           <div>
-            <p className="text-sm font-medium text-amber-400">Guest Mode</p>
+            <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Guest Mode</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Your history will be lost when you leave. Sign in to save permanently.
             </p>
@@ -91,7 +91,7 @@ export default function HistoryPage() {
           <Button
             size="sm"
             onClick={() => navigate('/login')}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 rounded-xl"
+            className="rounded-xl font-semibold"
           >
             <LogIn className="w-3.5 h-3.5 mr-1.5" /> Sign In
           </Button>
@@ -121,7 +121,7 @@ export default function HistoryPage() {
             !search && (
               <Button
                 onClick={() => navigate('/dashboard')}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 rounded-xl"
+                className="rounded-xl font-semibold"
               >
                 Upload Resume
               </Button>

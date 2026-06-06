@@ -531,7 +531,7 @@ export default function SocialLinksManager({ onChange }) {
           <Button
             onClick={saveSocialProfiles}
             disabled={saving || links.some(l => !l.is_verified)}
-            className="rounded-xl gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 py-2 h-auto px-5 font-bold"
+            className="rounded-xl gap-1.5 py-2 h-auto px-5 font-semibold"
           >
             {saving ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Syncing...</>

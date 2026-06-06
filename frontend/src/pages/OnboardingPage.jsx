@@ -12,25 +12,21 @@ const steps = [
     icon: Upload,
     title: 'Upload Your Resume',
     description: 'Simply drag and drop your PDF or DOCX resume. We accept all standard resume formats.',
-    color: 'from-blue-500 to-cyan-500',
   },
   {
     icon: Brain,
     title: 'AI Analyzes Everything',
     description: 'Our AI engine scores your resume against ATS systems, detects missing skills, and generates actionable insights.',
-    color: 'from-indigo-500 to-purple-500',
   },
   {
     icon: Target,
     title: 'Get Targeted Feedback',
     description: 'Receive recruiter-perspective feedback, interview questions, and specific improvement recommendations.',
-    color: 'from-purple-500 to-pink-500',
   },
   {
     icon: Rocket,
     title: 'Land Your Dream Job',
     description: 'Use our insights to optimize your resume and stand out from the competition. You\'re ready!',
-    color: 'from-pink-500 to-rose-500',
   },
 ];
 
@@ -80,8 +76,8 @@ export default function OnboardingPage() {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center"
             >
-              <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${current.color} flex items-center justify-center mb-6`}>
-                <Icon className="w-10 h-10 text-white" />
+              <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
+                <Icon className="w-10 h-10 text-primary" />
               </div>
 
               <h2 className="text-2xl font-heading font-bold mb-3">{current.title}</h2>
@@ -104,7 +100,7 @@ export default function OnboardingPage() {
 
             <Button
               onClick={next}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 rounded-xl px-6"
+              className="rounded-xl px-6"
             >
               {step === steps.length - 1 ? (
                 <>Get Started <Sparkles className="w-4 h-4 ml-1" /></>

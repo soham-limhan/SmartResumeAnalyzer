@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import upload, history, export, auth, enhance, social
+from app.routes import upload, history, export, auth, enhance, social, resumes, builder_export
 from app.database import init_firebase
 
 
@@ -89,6 +89,8 @@ app.include_router(history.router, prefix="/api", tags=["History"])
 app.include_router(export.router, prefix="/api", tags=["Export"])
 app.include_router(enhance.router, prefix="/api", tags=["AI Enhancement"])
 app.include_router(social.router, prefix="/api", tags=["Social Links"])
+app.include_router(resumes.router, prefix="/api", tags=["Resume Builder"])
+app.include_router(builder_export.router, prefix="/api", tags=["Resume Builder Export"])
 
 
 

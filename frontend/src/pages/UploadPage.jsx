@@ -181,9 +181,9 @@ export default function UploadPage() {
             Upload up to {MAX_FILES} resumes for instant AI-powered ATS analysis
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-          <Zap className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="text-xs font-semibold text-indigo-400">AI Ready</span>
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary border border-border">
+          <Zap className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground">AI Ready</span>
         </div>
       </div>
 
@@ -191,8 +191,8 @@ export default function UploadPage() {
       <div
         {...getRootProps()}
         className={`upload-zone cursor-pointer p-12 text-center transition-all
-          ${isDragActive ? 'active border-indigo-400/70' : ''}
-          ${files.length > 0 && !uploading ? 'border-indigo-400/40 bg-indigo-500/3' : ''}`}
+          ${isDragActive ? 'active border-primary' : ''}
+          ${files.length > 0 && !uploading ? 'border-primary/40 bg-muted/40' : ''}`}
       >
         <input {...getInputProps()} id="resume-upload" />
 
@@ -204,24 +204,24 @@ export default function UploadPage() {
           {/* Icon */}
           <div className="relative">
             <motion.div
-              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/25 flex items-center justify-center shadow-lg"
+              className="w-20 h-20 rounded-2xl bg-secondary border border-border flex items-center justify-center shadow-sm"
               animate={{ y: isDragActive ? -8 : 0 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              <FileUp className="w-9 h-9 text-indigo-400" />
+              <FileUp className="w-9 h-9 text-primary" />
             </motion.div>
             {/* Floating file icons */}
             {!isDragActive && (
               <>
                 <motion.div
-                  className="absolute -top-3 -right-5 w-8 h-10 rounded-lg bg-red-500/15 border border-red-500/25 flex items-center justify-center"
+                  className="absolute -top-3 -right-5 w-8 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center"
                   animate={{ y: [0, -4, 0], rotate: [3, 6, 3] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
                   <span className="text-[8px] font-bold text-red-400">PDF</span>
                 </motion.div>
                 <motion.div
-                  className="absolute -bottom-3 -left-5 w-8 h-10 rounded-lg bg-blue-500/15 border border-blue-500/25 flex items-center justify-center"
+                  className="absolute -bottom-3 -left-5 w-8 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center"
                   animate={{ y: [0, 4, 0], rotate: [-3, -6, -3] }}
                   transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }}
                 >
@@ -237,14 +237,14 @@ export default function UploadPage() {
               {isDragActive ? '✦ Drop your resumes here' : 'Drag & drop your resumes'}
             </p>
             <p className="text-sm text-muted-foreground">
-              or <span className="text-indigo-400 font-medium">click to browse</span> · PDF & DOCX · Up to 10MB · {MAX_FILES} files max
+              or <span className="text-primary font-medium">click to browse</span> · PDF & DOCX · Up to 10MB · {MAX_FILES} files max
             </p>
           </div>
 
           {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2">
             {['ATS Score', 'Keyword Analysis', 'AI Suggestions', 'Job Match'].map((feat) => (
-              <span key={feat} className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/8 text-muted-foreground font-medium">
+              <span key={feat} className="text-[11px] px-2.5 py-1 rounded-full bg-secondary border border-border text-muted-foreground font-medium">
                 {feat}
               </span>
             ))}
@@ -263,7 +263,7 @@ export default function UploadPage() {
             <GlassCard hover={false}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Files className="w-4 h-4 text-indigo-400" />
+                  <Files className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-semibold font-heading">
                     {files.length} {files.length === 1 ? 'Resume' : 'Resumes'} Selected
                   </h3>
@@ -286,10 +286,10 @@ export default function UploadPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ delay: idx * 0.03 }}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/3 hover:bg-white/6 border border-white/5 transition-colors group"
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/30 hover:bg-muted/50 border border-border transition-colors group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/12 border border-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                    <div className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-3.5 h-3.5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{file.name}</p>
@@ -332,7 +332,7 @@ export default function UploadPage() {
           placeholder="Paste the job description here to get a match score and role-targeted suggestions..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          className="min-h-[110px] bg-white/3 border-white/10 resize-none text-sm focus:border-indigo-500/40 focus:ring-0 placeholder:text-muted-foreground/40"
+          className="min-h-[110px] bg-secondary border-border resize-none text-sm focus:border-primary/45 focus:ring-0 placeholder:text-muted-foreground/45"
           disabled={uploading}
         />
         {jobDescription.trim() && (
@@ -389,12 +389,12 @@ export default function UploadPage() {
               ) : (
                 <div className="space-y-3 py-2">
                   <div className="flex items-center gap-3">
-                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin flex-shrink-0" />
+                    <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0" />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Uploading {files.length} {files.length === 1 ? 'resume' : 'resumes'}...</p>
                       <p className="text-xs text-muted-foreground">Preparing files for AI analysis</p>
                     </div>
-                    <span className="text-sm font-bold text-indigo-400 tabular-nums">{Math.round(progress)}%</span>
+                    <span className="text-sm font-bold text-primary tabular-nums">{Math.round(progress)}%</span>
                   </div>
                   {/* Progress bar */}
                   <div className="progress-bar">
@@ -407,20 +407,20 @@ export default function UploadPage() {
               )}
 
               {/* Stage indicators */}
-              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/8">
+              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-border">
                 {STAGES.slice(0, 2).map((s, i) => {
                   const isDone = currentStageIndex > i;
                   const isCurrent = currentStageIndex === i;
                   return (
                     <div key={s.id} className="flex items-center gap-1.5">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all
-                        ${isDone ? 'bg-emerald-500/20 text-emerald-400' : isCurrent ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/5 text-muted-foreground/30'}`}>
+                        ${isDone ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : isCurrent ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-secondary text-muted-foreground/30'}`}>
                         {isDone ? <CheckCircle2 className="w-3 h-3" /> : <span className="text-[8px] font-bold">{i + 1}</span>}
                       </div>
-                      <span className={`text-[10px] font-medium ${isCurrent ? 'text-indigo-400' : isDone ? 'text-emerald-400' : 'text-muted-foreground/40'}`}>
+                      <span className={`text-[10px] font-bold ${isCurrent ? 'text-primary' : isDone ? 'text-emerald-500' : 'text-muted-foreground/40'}`}>
                         {s.label}
                       </span>
-                      {i < 1 && <div className="w-6 h-px bg-white/8" />}
+                      {i < 1 && <div className="w-6 h-px bg-border" />}
                     </div>
                   );
                 })}
@@ -433,8 +433,8 @@ export default function UploadPage() {
                       <span>{formatTime(elapsed)}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs tabular-nums">
-                      <Timer className="w-3 h-3 text-indigo-400" />
-                      <span className="text-indigo-400 font-medium">
+                      <Timer className="w-3 h-3 text-primary" />
+                      <span className="text-primary font-medium">
                         {etaRemaining > 0 ? `~${formatTime(etaRemaining)} left` : 'Almost done...'}
                       </span>
                     </div>
@@ -452,8 +452,8 @@ export default function UploadPage() {
         disabled={files.length === 0 || uploading}
         className={`w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2.5 transition-all
           ${files.length === 0 || uploading
-            ? 'bg-white/5 text-muted-foreground/40 cursor-not-allowed border border-white/8'
-            : 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:from-indigo-600 hover:to-violet-700 glow-indigo'
+            ? 'bg-muted text-muted-foreground/40 cursor-not-allowed border border-border'
+            : 'bg-primary text-white hover:bg-primary/95 shadow-sm'
           }`}
         whileHover={files.length > 0 && !uploading ? { scale: 1.02, y: -2 } : {}}
         whileTap={files.length > 0 && !uploading ? { scale: 0.98 } : {}}
