@@ -28,13 +28,15 @@ async def list_history(user: Optional[dict] = Depends(get_current_user)):
         docs = (
             db.collection("analyses")
             .where("user_id", "==", user["uid"])
-            .order_by("uploaded_at", direction="DESCENDING")
             .stream()
         )
         items = []
         for doc in docs:
             data = doc.to_dict()
             items.append(data)
+
+        # Sort client-side by uploaded_at descending (lexicographical ISO string sorting)
+        items.sort(key=lambda x: x.get("uploaded_at") or "", reverse=True)
 
         return HistoryListResponse(total=len(items), items=items)
     else:

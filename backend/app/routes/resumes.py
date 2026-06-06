@@ -96,14 +96,17 @@ async def get_resumes(user: dict = Depends(get_current_user)):
         docs = (
             db.collection("resumes")
             .where("user_id", "==", user["uid"])
-            .order_by("updated_at", direction="DESCENDING")
             .stream()
         )
         
-        resumes = []
+        raw_resumes = []
         for doc in docs:
-            data = doc.to_dict()
-            resumes.append(ResumeModel.model_validate(data))
+            raw_resumes.append(doc.to_dict())
+            
+        # Sort client-side by updated_at descending (lexicographically sorting ISO strings)
+        raw_resumes.sort(key=lambda x: x.get("updated_at") or "", reverse=True)
+        
+        resumes = [ResumeModel.model_validate(data) for data in raw_resumes]
         return resumes
     except Exception as e:
         logger.exception(f"Failed to fetch resumes for user {user['uid']}")

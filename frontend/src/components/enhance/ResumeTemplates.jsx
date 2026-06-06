@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 // Platform labels
 const PLATFORM_LABELS = {
@@ -7,16 +7,133 @@ const PLATFORM_LABELS = {
   portfolio: 'Portfolio',
 };
 
+export function AutoSizedPreview({ children, pageBudget = 1 }) {
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  const targetHeight = pageBudget * 842;
+  const resumeWidth = 793; // 595pt in pixels at standard DPI
+
+  useEffect(() => {
+    const el = contentRef.current;
+    const container = containerRef.current;
+    if (!el || !container) return;
+
+    const updateScale = () => {
+      // 1. Calculate height scale
+      const H = el.scrollHeight || el.offsetHeight || targetHeight;
+      const heightScale = H > targetHeight ? targetHeight / H : 1;
+
+      // 2. Calculate width scale based on parent wrapper width
+      const parent = container.parentElement;
+      const W_wrapper = parent ? parent.offsetWidth - 12 : resumeWidth;
+      const widthScale = W_wrapper < resumeWidth ? W_wrapper / resumeWidth : 1;
+
+      // 3. Final scale is product of height and width scales
+      setScale(heightScale * widthScale);
+    };
+
+    updateScale();
+
+    const observer = new ResizeObserver(() => {
+      updateScale();
+    });
+    observer.observe(el);
+    if (container.parentElement) {
+      observer.observe(container.parentElement);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [children, pageBudget, targetHeight]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative overflow-hidden border border-border bg-white rounded-md shadow-lg mx-auto"
+      style={{ 
+        width: `${resumeWidth * scale}px`,
+        height: `${targetHeight * scale}px`,
+        transition: 'height 0.15s ease-out, width 0.15s ease-out'
+      }}
+    >
+      <div 
+        ref={contentRef} 
+        style={{ 
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top left',
+          width: `${resumeWidth}px`,
+          minHeight: `${targetHeight}px`,
+        }}
+      >
+        {children}
+      </div>
+      
+      {/* Page break line indicator (only visible on 2-page budget in preview) */}
+      {pageBudget === 2 && (
+        <div 
+          className="absolute left-0 right-0 border-t border-dashed border-red-400 pointer-events-none z-50 flex items-center justify-center"
+          style={{ top: `${842 * scale}px` }}
+        >
+          <span 
+            className="bg-red-500/10 text-red-500 font-bold rounded-b backdrop-blur-sm uppercase tracking-wider text-center"
+            style={{ fontSize: `${Math.max(6, 8 * scale)}px`, padding: `${2 * scale}px ${6 * scale}px` }}
+          >
+            Page 1 / Page 2 Break
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ResumeTemplates({ resumeData, templateId }) {
   if (!resumeData) return null;
 
-  const {
-    personalInfo = {},
-    education = [],
-    experience = [],
-    skills = { technical: [], soft: [], languages: [], certifications: [] },
-    projects = [],
-  } = resumeData;
+  const { personalInfo = {} } = resumeData;
+
+  const isEmpty = (arr) => !arr || arr.length === 0;
+
+  const education = isEmpty(resumeData.education) ? [{
+    id: 'placeholder-edu',
+    degree: 'Your Degree / Certification Title',
+    institution: 'University or College Name',
+    startDate: 'Sept 2020',
+    endDate: 'June 2024',
+    gpa: '3.8 / 4.0',
+    description: 'Provide an overview of your major, honors, GPA, and extracurricular activities.'
+  }] : resumeData.education;
+
+  const experience = isEmpty(resumeData.experience) ? [{
+    id: 'placeholder-exp',
+    jobTitle: 'Your Role / Job Title',
+    company: 'Company / Organization Name',
+    location: 'City, State',
+    startDate: 'Jan 2022',
+    endDate: 'Present',
+    current: true,
+    responsibilities: 'Describe your responsibilities, duties, and specific contributions.\nHighlight achievements and quantify metrics where possible (e.g. Led a team of X, boosted conversion by Y%).',
+    achievements: 'Add a notable achievement here'
+  }] : resumeData.experience;
+
+  const projects = isEmpty(resumeData.projects) ? [{
+    id: 'placeholder-proj',
+    projectName: 'Your Project Name',
+    description: 'Provide a brief overview of the project, including its scope, your role, and the final results.',
+    technologies: ['React', 'Node.js', 'PostgreSQL'],
+    githubLink: 'github.com/username/project',
+    liveDemoLink: 'project-live.com'
+  }] : resumeData.projects;
+
+  const rawSkills = resumeData.skills || {};
+  const skills = {
+    technical: isEmpty(rawSkills.technical) ? ['Technical Skills', 'JavaScript', 'Python'] : rawSkills.technical,
+    soft: isEmpty(rawSkills.soft) ? ['Team Leadership', 'Communication'] : rawSkills.soft,
+    languages: isEmpty(rawSkills.languages) ? ['Languages'] : rawSkills.languages,
+    certifications: isEmpty(rawSkills.certifications) ? ['Certifications'] : rawSkills.certifications,
+  };
 
   const renderContacts = (isAts = false) => {
     const parts = [
