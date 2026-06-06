@@ -155,17 +155,11 @@ export default function Sidebar() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-indigo-500/8 border border-indigo-500/15">
+              <div className="flex items-center justify-start px-3 py-2 rounded-xl bg-indigo-500/8 border border-indigo-500/15">
                 <div className="flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-indigo-400" />
                   <span className="text-xs font-semibold text-indigo-400">Free Plan</span>
                 </div>
-                <button
-                  onClick={() => navigate('/settings')}
-                  className="text-[10px] text-muted-foreground hover:text-indigo-400 font-medium transition-colors"
-                >
-                  Upgrade ↗
-                </button>
               </div>
             </motion.div>
           )}

@@ -12,6 +12,21 @@ const AI_MESSAGES = [
   { icon: Sparkles,   text: 'Polishing final resume for maximum impact...' },
 ];
 
+const PARTICLES = [
+  { delay: 0.0, x: 25, y: 35 },
+  { delay: 0.2, x: 70, y: 45 },
+  { delay: 0.4, x: 45, y: 75 },
+  { delay: 0.6, x: 85, y: 25 },
+  { delay: 0.8, x: 15, y: 65 },
+  { delay: 1.0, x: 60, y: 55 },
+  { delay: 1.2, x: 30, y: 80 },
+  { delay: 1.4, x: 50, y: 20 },
+  { delay: 1.6, x: 90, y: 70 },
+  { delay: 1.8, x: 10, y: 40 },
+  { delay: 2.0, x: 75, y: 60 },
+  { delay: 2.2, x: 35, y: 50 },
+];
+
 // Particle component for background shimmer
 function Particle({ delay, x, y }) {
   return (
@@ -86,16 +101,11 @@ export default function AIThinkingLoader({ mode = 'professional' }) {
   }, []);
 
   const CurrentIcon = AI_MESSAGES[msgIdx].icon;
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    delay: i * 0.2,
-    x: 10 + Math.random() * 80,
-    y: 20 + Math.random() * 60,
-  }));
 
   return (
     <div className={`relative flex flex-col items-center justify-center py-16 px-6 overflow-hidden bg-gradient-to-br ${colors.bg} rounded-2xl`}>
       {/* Background particles */}
-      {particles.map((p, i) => (
+      {PARTICLES.map((p, i) => (
         <Particle key={i} delay={p.delay} x={p.x} y={p.y} />
       ))}
 

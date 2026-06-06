@@ -3,8 +3,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Download, Brain, CheckCircle2, XCircle, Lightbulb,
-  MessageSquare, HelpCircle, Target, TrendingUp, Briefcase, Sparkles, Loader2,
-  BarChart3 as BarChartIcon, Star, Zap, FileText, Wand2, AlertTriangle,
+  HelpCircle, Target, TrendingUp, Briefcase, Sparkles, Loader2,
+  BarChart3 as BarChartIcon, Star, Zap, Wand2, AlertTriangle,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer, Cell, RadarChart,
@@ -55,7 +55,18 @@ export default function AnalysisPage() {
   const [data, setData] = useState(location.state?.analysis || null);
   const [loading, setLoading] = useState(!data);
   const [exporting, setExporting] = useState(false);
-  const [activeSocialLinks, setActiveSocialLinks] = useState([]);
+  const [activeSocialLinks] = useState(() => {
+    const cached = localStorage.getItem('smartresume-social-links');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        return parsed.filter(l => l.is_enabled && l.url);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
   const [generatingAnswers, setGeneratingAnswers] = useState({});
   const [customAnswers, setCustomAnswers] = useState({});
 
@@ -71,7 +82,7 @@ export default function AnalysisPage() {
         if (analysisObj.interview_questions) {
           analysisObj.interview_questions = analysisObj.interview_questions.map(q => {
             const qTxt = typeof q === 'string' ? q : q.question || '';
-            if (qTxt.trim().lower() === questionText.trim().lower()) {
+            if (qTxt.trim().toLowerCase() === questionText.trim().toLowerCase()) {
               return { question: questionText, answer: res.answer };
             }
             return q;
@@ -87,20 +98,7 @@ export default function AnalysisPage() {
   };
 
   useEffect(() => {
-    const cached = localStorage.getItem('smartresume-social-links');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        setActiveSocialLinks(parsed.filter(l => l.is_enabled && l.url));
-      } catch (e) {
-        // Ignore
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     if (!data && id) {
-      setLoading(true);
       getAnalysis(id)
         .then((res) => setData(res))
         .catch(() => navigate('/dashboard'))
@@ -139,7 +137,6 @@ export default function AnalysisPage() {
   const aiConf = Math.round((analysis.ai_confidence || 0) * 100);
   const expLevel = analysis.experience_level || 'N/A';
 
-  const scoreColor = atsScore >= 80 ? '#22c55e' : atsScore >= 60 ? '#f59e0b' : '#ef4444';
   const scoreLabel = atsScore >= 80 ? 'Excellent' : atsScore >= 60 ? 'Good' : 'Needs Work';
 
   return (

@@ -13,7 +13,7 @@ export default function ScoreRing({
   animate = true,
   className = '',
 }) {
-  const [displayScore, setDisplayScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(() => animate ? 0 : score);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = displayScore / 100;
@@ -30,7 +30,7 @@ export default function ScoreRing({
     : '239 68 68';
 
   useEffect(() => {
-    if (!animate) { setDisplayScore(score); return; }
+    if (!animate) { return; }
     let raf;
     const start = performance.now();
     const duration = 1800;

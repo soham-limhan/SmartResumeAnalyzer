@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowUpDown, CheckSquare, Square, Filter, Download,
-  FileText, ChevronDown, ChevronUp, Sparkles, Users, AlertCircle,
-  X, Eye, Briefcase, Target, TrendingUp, CheckCircle2, XCircle,
+  FileText, ChevronDown, ChevronUp, Users, AlertCircle,
+  X, Eye, Briefcase, Target, CheckCircle2, XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +39,7 @@ function ScorePill({ score, label }) {
 
 export default function BatchResultsPage() {
   const navigate = useNavigate();
-  const { batchResults, clearBatchResults } = useAuth();
+  const { batchResults } = useAuth();
   const [sortBy, setSortBy] = useState('ats_score');
   const [sortDir, setSortDir] = useState('desc');
   const [minScore, setMinScore] = useState(0);
@@ -50,21 +50,15 @@ export default function BatchResultsPage() {
   const [showCompare, setShowCompare] = useState(false);
   const [showShortlistOnly, setShowShortlistOnly] = useState(false);
 
-  if (!batchResults || !batchResults.results) {
-    return (
-      <div className="max-w-5xl mx-auto">
-        <EmptyState
-          icon="history"
-          title="No Batch Results"
-          description="Upload multiple resumes to see batch analysis results here."
-          action={<Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 rounded-xl">Upload Resumes</Button>}
-        />
-      </div>
-    );
-  }
+  const successResults = useMemo(() => {
+    if (!batchResults || !batchResults.results) return [];
+    return batchResults.results.filter(r => r.success);
+  }, [batchResults]);
 
-  const successResults = batchResults.results.filter(r => r.success);
-  const failedResults = batchResults.results.filter(r => !r.success);
+  const failedResults = useMemo(() => {
+    if (!batchResults || !batchResults.results) return [];
+    return batchResults.results.filter(r => !r.success);
+  }, [batchResults]);
 
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -102,6 +96,19 @@ export default function BatchResultsPage() {
     });
     return items;
   }, [successResults, sortBy, sortDir, minScore, expFilter, showShortlistOnly, shortlisted]);
+
+  if (!batchResults || !batchResults.results) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <EmptyState
+          icon="history"
+          title="No Batch Results"
+          description="Upload multiple resumes to see batch analysis results here."
+          action={<Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 rounded-xl">Upload Resumes</Button>}
+        />
+      </div>
+    );
+  }
 
   const avgAts = successResults.length > 0
     ? Math.round(successResults.reduce((s, r) => s + (r.analysis?.ats_score || 0), 0) / successResults.length)

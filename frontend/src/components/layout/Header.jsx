@@ -1,5 +1,5 @@
 import { useTheme } from '@/context/ThemeContext';
-import { Sun, Moon, Sparkles, Bell, Search } from 'lucide-react';
+import { Sun, Moon, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -52,31 +52,8 @@ export default function Header() {
           {/* Mobile title */}
           <h1 className="md:hidden text-sm font-heading font-semibold">{meta.title}</h1>
         </div>
-
-        {/* Center: Search bar (desktop) */}
-        <div className="hidden lg:flex flex-1 max-w-xs mx-4">
-          <div className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 hover:border-white/12 transition-all cursor-text">
-            <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            <span className="text-xs text-muted-foreground/60">Search history, analyses...</span>
-            <div className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/8 border border-white/8">
-              <span className="text-[9px] text-muted-foreground font-mono">⌘K</span>
-            </div>
-          </div>
-        </div>
-
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5">
-          {/* Notification bell */}
-          <motion.button
-            className="relative p-2 rounded-xl hover:bg-white/8 text-muted-foreground hover:text-foreground transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title="Notifications"
-          >
-            <Bell className="w-4.5 h-4.5" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-400" />
-          </motion.button>
-
           {/* Theme toggle */}
           <motion.button
             onClick={toggleTheme}

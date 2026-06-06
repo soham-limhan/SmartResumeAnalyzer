@@ -21,7 +21,6 @@ export default function SettingsPage() {
   const [socialLinks, setSocialLinks] = useState([]);
 
   useEffect(() => {
-    setChecking(true);
     checkHealth()
       .then(setHealth)
       .catch(() => setHealth(null))
@@ -35,7 +34,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSocialChange = (links, displayMode) => {
+  const handleSocialChange = (links) => {
     setSocialLinks(links);
   };
 

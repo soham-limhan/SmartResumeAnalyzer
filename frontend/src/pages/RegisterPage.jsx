@@ -14,7 +14,7 @@ const PASSWORD_RULES = [
   { label: 'One uppercase letter (A-Z)', test: (p) => /[A-Z]/.test(p) },
   { label: 'One lowercase letter (a-z)', test: (p) => /[a-z]/.test(p) },
   { label: 'One number (0-9)', test: (p) => /[0-9]/.test(p) },
-  { label: 'One special character (!@#$%^&*)', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p) },
+  { label: 'One special character (!@#$%^&*)', test: (p) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(p) },
 ];
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

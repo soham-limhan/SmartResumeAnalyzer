@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Brain, Loader2, AlertTriangle, CheckCircle2, ArrowRight, Star, RefreshCw, Send } from 'lucide-react';
+import { Sparkles, Brain, Loader2, AlertTriangle, CheckCircle2, ArrowRight, Star, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import GlassCard from '@/components/shared/GlassCard';
@@ -11,13 +11,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }) {
-  const [targetRole, setTargetRole] = useState('');
-  const [analyzing, setAnalyzing] = useState(false);
-  const [recommendations, setRecommendations] = useState(null);
-  const [error, setError] = useState(null);
-
-  // Pre-load a default target role based on local storage history
-  useEffect(() => {
+  const [targetRole, setTargetRole] = useState(() => {
     const history = localStorage.getItem('smartresume-history');
     if (history) {
       try {
@@ -25,20 +19,21 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
         if (parsed && parsed.length > 0) {
           const first = parsed[0];
           const industry = first.analysis?.industry_fit?.[0] || '';
-          const expLevel = first.analysis?.experience_level || '';
           if (industry) {
-            setTargetRole(industry + ' Developer' || industry);
+            return industry + ' Developer';
           }
         }
-      } catch (e) {
+      } catch {
         // Fallback
       }
     }
-  }, []);
+    return '';
+  });
+  const [analyzing, setAnalyzing] = useState(false);
+  const [recommendations, setRecommendations] = useState(null);
 
-  const runPresenceAudit = async () => {
+  const runPresenceAudit = useCallback(async () => {
     setAnalyzing(true);
-    setError(null);
     try {
       const payload = {
         current_links: currentLinks,
@@ -49,18 +44,23 @@ export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }
       setRecommendations(res.data);
     } catch (err) {
       console.error('Presence audit failed:', err);
-      setError('Failed to generate AI suggestions. Please try again.');
     } finally {
       setAnalyzing(false);
     }
-  };
+  }, [currentLinks, targetRole]);
 
   // Auto audit on first load if links change
   useEffect(() => {
+    let active = true;
     if (currentLinks.length > 0 && !recommendations && !analyzing) {
-      runPresenceAudit();
+      Promise.resolve().then(() => {
+        if (active) runPresenceAudit();
+      });
     }
-  }, [currentLinks]);
+    return () => {
+      active = false;
+    };
+  }, [currentLinks, recommendations, analyzing, runPresenceAudit]);
 
   const score = recommendations?.completeness_score || 0;
   const missing = recommendations?.missing_platforms || [];

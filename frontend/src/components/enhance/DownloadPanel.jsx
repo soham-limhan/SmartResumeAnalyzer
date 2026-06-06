@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, FileText, FileType, Copy, CheckCircle2, Loader2, Sparkles, Share2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,26 +14,22 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
   const [docxDone, setDocxDone] = useState(false);
 
   // New State for Social Links Integration on download
-  const [exportMode, setExportMode] = useState('compact');
-  const [socialLinks, setSocialLinks] = useState([]);
-
-  const safeName = (candidateName || 'resume').replace(/\s+/g, '_').toLowerCase();
-
-  // Load social links from cache
-  useEffect(() => {
+  const [exportMode, setExportMode] = useState(() => {
+    return localStorage.getItem('smartresume-social-mode') || 'compact';
+  });
+  const [socialLinks] = useState(() => {
     const cachedLinks = localStorage.getItem('smartresume-social-links');
-    const cachedMode = localStorage.getItem('smartresume-social-mode');
     if (cachedLinks) {
       try {
-        setSocialLinks(JSON.parse(cachedLinks));
-      } catch (e) {
+        return JSON.parse(cachedLinks);
+      } catch {
         console.error('Failed to parse cached social links');
       }
     }
-    if (cachedMode) {
-      setExportMode(cachedMode);
-    }
-  }, []);
+    return [];
+  });
+
+  const safeName = (candidateName || 'resume').replace(/\s+/g, '_').toLowerCase();
 
   const handlePdfDownload = async () => {
     setPdfLoading(true);

@@ -180,7 +180,7 @@ export default function EnhancePage() {
   const [step, setStep] = useState(1);
   const [mode, setMode] = useState('professional');
   const [jd, setJd] = useState('');
-  const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState(null);
   const [analysisData, setAnalysisData] = useState(location.state?.analysis || null);
   const [result, setResult] = useState(null); // EnhanceResponse
@@ -196,7 +196,7 @@ export default function EnhancePage() {
 
   const handleEnhance = async () => {
     setError(null);
-    setLoading(true);
+
     setStep(2); // show AI loader
 
     try {
@@ -210,8 +210,6 @@ export default function EnhancePage() {
         'Enhancement failed. Please try again.'
       );
       setStep(1); // back to mode selection
-    } finally {
-      setLoading(false);
     }
   };
 

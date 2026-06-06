@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, Upload, BarChart3, Brain, Target, Zap, FileCheck, MessageSquare,
-  ChevronRight, ArrowRight, Shield, Search, Star, CheckCircle2, X,
+  ChevronRight, ArrowRight, Search, Star, CheckCircle2,
   TrendingUp, FileText, Layers, Eye, Award, ChevronDown, Menu,
 } from 'lucide-react';
 import Particles from '@/components/shared/Particles';
@@ -94,10 +94,7 @@ const faqs = [
 ];
 
 /* ─── ANIMATIONS ─────────────────────────────────────────────────── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i = 0) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.55, ease: [0.25, 0.1, 0.25, 1] } }),
-};
+
 
 /* ─── HERO DASHBOARD MOCKUP ──────────────────────────────────────── */
 function HeroDashboardMockup() {

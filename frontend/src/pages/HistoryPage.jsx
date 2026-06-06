@@ -25,25 +25,30 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const fetchHistory = async () => {
-    try {
-      if (user) {
-        // Authenticated → fetch from API (Firestore)
-        const res = await getHistory();
-        setItems(res.items || []);
-      } else {
-        // Guest → use in-memory context data
-        setItems(guestAnalyses);
-      }
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let active = true;
+    
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        if (user) {
+          const res = await getHistory();
+          if (active) setItems(res.items || []);
+        } else {
+          if (active) setItems(guestAnalyses);
+        }
+      } catch {
+        if (active) setItems([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
     fetchHistory();
+
+    return () => {
+      active = false;
+    };
   }, [user, guestAnalyses]);
 
   const handleDelete = async (id, e) => {

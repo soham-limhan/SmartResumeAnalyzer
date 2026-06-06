@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Globe, Link, Trash2, Plus, GripVertical, CheckCircle2, AlertCircle, Eye, EyeOff,
-  Sparkles, Code, Trophy, BarChart3, HelpCircle, Loader2, RefreshCw, ChevronUp, ChevronDown, Check, TrendingUp
+  Code, Trophy, BarChart3, HelpCircle, Loader2, RefreshCw, ChevronUp, ChevronDown, Check, TrendingUp
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import GlassCard from '@/components/shared/GlassCard';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import axios from 'axios';
 
@@ -87,7 +86,7 @@ export function normalizeUrl(url) {
     if (cleaned.endsWith('/') && cleaned.split('/').length > 4) {
       cleaned = cleaned.replace(/\/$/, ''); // Remove trailing slash
     }
-  } catch (e) {
+  } catch {
     // Ignore URL errors
   }
   return cleaned;
@@ -159,7 +158,7 @@ export default function SocialLinksManager({ onChange }) {
     };
 
     fetchLinks();
-  }, [user]);
+  }, [user, getToken]);
 
   // Sync to parent component
   useEffect(() => {

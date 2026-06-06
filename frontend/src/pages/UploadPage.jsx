@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload, FileText, X, Sparkles, Loader2, CheckCircle2, AlertCircle,
-  FileUp, Clock, Timer, Files, Trash2, Zap, BarChart3, Brain,
+  FileUp, Clock, Timer, Files, Trash2, Zap, Brain,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,7 +67,6 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (stage === 'analyzing') {
-      setElapsed(0);
       timerRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);
     } else {
       clearInterval(timerRef.current);
@@ -77,7 +76,6 @@ export default function UploadPage() {
   }, [stage]);
 
   const etaRemaining = Math.max(0, estimatedTotalSeconds - elapsed);
-  const etaProgress = estimatedTotalSeconds > 0 ? Math.min(100, (elapsed / estimatedTotalSeconds) * 100) : 0;
 
   const onDrop = useCallback((accepted, rejected) => {
     setError(null);
@@ -130,6 +128,7 @@ export default function UploadPage() {
     setError(null);
     setStage('uploading');
     setProgress(0);
+    setElapsed(0);
 
     try {
       const onProgress = (pct) => { setProgress(pct); if (pct >= 100) setStage('analyzing'); };
