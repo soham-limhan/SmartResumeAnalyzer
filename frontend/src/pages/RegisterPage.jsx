@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Sparkles, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -120,8 +120,8 @@ export default function RegisterPage() {
       >
         <div className="glass-strong rounded-3xl p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="mb-4">
+              <img src="/logo.png" alt="Smart Resume Analyzer" className="h-12 w-auto" />
             </div>
             <h1 className="text-2xl font-heading font-bold">Create Account</h1>
             <p className="text-sm text-muted-foreground mt-1">Start optimizing your career</p>

@@ -1,5 +1,5 @@
 import { useTheme } from '@/context/ThemeContext';
-import { Sun, Moon, Sparkles } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -33,9 +33,9 @@ export default function Header() {
           {/* Mobile logo */}
           <button
             onClick={() => navigate('/')}
-            className="md:hidden w-8 h-8 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm"
+            className="md:hidden flex-shrink-0"
           >
-            <Sparkles className="w-4 h-4 text-white" />
+            <img src="/logo.png" alt="Smart Resume Analyzer" className="h-7 w-auto" />
           </button>
 
           {/* Breadcrumb (desktop) */}

@@ -4,14 +4,12 @@ import {
   Upload,
   History,
   Settings,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   LogOut,
   LogIn,
   User,
   ClipboardList,
-  Zap,
   LayoutDashboard,
   FileText,
 } from 'lucide-react';
@@ -53,25 +51,10 @@ export default function Sidebar() {
       <div className="flex items-center gap-3 px-4 py-5 border-b border-border flex-shrink-0">
         <button
           onClick={() => navigate('/')}
-          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm hover:scale-105 transition-transform"
+          className="flex-shrink-0 hover:scale-105 transition-transform"
         >
-          <Sparkles className="w-4.5 h-4.5 text-white" />
+          <img src="/logo.png" alt="Smart Resume Analyzer" className={collapsed ? 'h-7 w-auto' : 'h-8 w-auto'} />
         </button>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden whitespace-nowrap"
-            >
-              <span className="font-heading font-bold text-base text-foreground">
-                SmartResume
-              </span>
-              <p className="text-[10px] text-muted-foreground font-medium -mt-0.5">AI Resume Intelligence</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* ── Navigation ───────────────────────────────────────── */}
@@ -146,26 +129,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* ── User + Plan section ───────────────────────────────── */}
+      {/* ── User section ──────────────────────────────────────── */}
       <div className="p-3 border-t border-border space-y-2 flex-shrink-0">
-        {/* Plan badge (non-collapsed) */}
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="flex items-center justify-start px-3 py-2 rounded-xl bg-muted border border-border">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  <span className="text-xs font-semibold text-muted-foreground">Free Plan</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* User card */}
         {user && (

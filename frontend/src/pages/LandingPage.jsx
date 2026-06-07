@@ -23,54 +23,6 @@ const testimonials = [
   { name: 'Aisha Patel', role: 'Data Analyst', company: 'Meta', quote: 'Having direct recruiter feedback helped me understand exactly where my projects fell short.' },
 ];
 
-const pricingPlans = [
-  {
-    plan: 'Free',
-    price: 0,
-    description: 'Perfect for students and first-time job seekers getting started.',
-    features: [
-      { text: '3 resume analyses/month', included: true },
-      { text: 'ATS compatibility scoring', included: true },
-      { text: 'Structured Resume Builder', included: true },
-      { text: 'Basic PDF export', included: true },
-      { text: 'Job match analysis', included: false },
-      { text: 'DOCX exports', included: false },
-    ],
-    cta: 'Start Free',
-    highlighted: false,
-  },
-  {
-    plan: 'Pro',
-    price: 9,
-    description: 'For active job seekers who want a competitive edge.',
-    features: [
-      { text: 'Unlimited analyses', included: true },
-      { text: 'All Resume Builder templates', included: true },
-      { text: 'Full PDF & DOCX downloads', included: true },
-      { text: 'Job description comparison', included: true },
-      { text: 'AI Interview prep questions', included: true },
-      { text: 'Priority AI processing queue', included: true },
-    ],
-    cta: 'Start Pro Mode',
-    highlighted: true,
-    badge: 'Most Popular',
-  },
-  {
-    plan: 'Enterprise',
-    price: 29,
-    description: 'For career coaches and recruitment agencies.',
-    features: [
-      { text: 'Everything in Pro', included: true },
-      { text: 'Batch uploads (up to 25)', included: true },
-      { text: 'Candidate comparisons', included: true },
-      { text: 'Custom templates & fonts', included: true },
-      { text: 'Dedicated service API', included: true },
-    ],
-    cta: 'Start Enterprise',
-    highlighted: false,
-  },
-];
-
 const faqs = [
   { q: 'How does the ATS scoring work?', a: 'Our parsing pipeline replicates standard ATS algorithms. We inspect formatting, headers, date alignments, contact placements, and term frequencies to generate a compatibility percentage.' },
   { q: 'What is the benefit of the Resume Builder?', a: 'Standard text editors insert floating blocks, boxes, or tables that confuse parser tools. Our builder outputs clean, linear structure that parses flawlessly every time.' },
@@ -103,7 +55,7 @@ function HeroDashboardMockup() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-2.5 border-b border-border">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <img src="/logo.png" alt="" className="h-4 w-auto" />
             <span className="text-xs font-bold text-foreground">ATS Optimization Radar</span>
           </div>
           <span className="text-[9px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
@@ -205,11 +157,8 @@ export default function LandingPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b ${scrolled ? 'bg-card/85 backdrop-blur-md border-border shadow-sm' : 'bg-transparent border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-5 md:px-10 py-3 flex items-center justify-between">
           {/* Logo */}
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-heading font-extrabold text-sm tracking-tight text-foreground">
-              SmartResume
-            </span>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1">
+            <img src="/logo.png" alt="Smart Resume Analyzer" className="h-8 w-auto" />
           </button>
 
           {/* Actions */}
@@ -350,56 +299,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING ────────────────────────────────────────────── */}
-      <section id="pricing" className="py-16 border-t border-border bg-card/30">
-        <div className="max-w-7xl mx-auto px-5 md:px-10">
-          <div className="text-center max-w-xl mx-auto mb-12 space-y-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">Transparent Pricing</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Free sandbox with premium upgrades available.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {pricingPlans.map((plan, i) => (
-              <div
-                key={i}
-                className={`bg-card border rounded-xl p-6 flex flex-col justify-between text-left relative shadow-sm
-                  ${plan.highlighted ? 'border-primary/80 ring-1 ring-primary/20' : 'border-border'}`}
-              >
-                {plan.badge && (
-                  <span className="absolute top-3 right-3 text-[9px] font-bold text-white bg-primary px-2 py-0.5 rounded-md">
-                    {plan.badge}
-                  </span>
-                )}
-                <div>
-                  <h3 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground mb-1">{plan.plan}</h3>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-2xl font-black text-foreground">${plan.price}</span>
-                    <span className="text-[10px] text-muted-foreground">/month</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed mb-5">{plan.description}</p>
-                  
-                  <div className="border-t border-border/80 pt-4 space-y-2.5 mb-6">
-                    {plan.features.map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-[10.5px]">
-                        <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${feat.included ? 'text-primary' : 'text-muted-foreground/30'}`} />
-                        <span className={feat.included ? 'text-foreground/90' : 'text-muted-foreground/40'}>{feat.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => navigate('/dashboard')}
-                  className={`w-full py-2 h-auto text-xs font-bold rounded-lg
-                    ${plan.highlighted ? 'bg-primary hover:bg-primary/95 text-white' : 'bg-secondary text-foreground hover:bg-muted'}`}
-                >
-                  {plan.cta}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
       <section id="faq" className="py-20 border-t border-border">

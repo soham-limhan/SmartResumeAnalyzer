@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -92,8 +92,8 @@ export default function LoginPage() {
         <div className="glass-strong rounded-3xl p-8">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="mb-4">
+              <img src="/logo.png" alt="Smart Resume Analyzer" className="h-12 w-auto" />
             </div>
             <h1 className="text-2xl font-heading font-bold">Welcome Back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
