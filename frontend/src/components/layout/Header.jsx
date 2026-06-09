@@ -1,4 +1,5 @@
 import { useTheme } from '@/context/ThemeContext';
+import Logo from '@/components/shared/Logo';
 import { Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -35,7 +36,7 @@ export default function Header() {
             onClick={() => navigate('/')}
             className="md:hidden flex-shrink-0"
           >
-            <img src="/logo.png" alt="Smart Resume Analyzer" className="h-7 w-auto" />
+            <Logo size={26} showText={false} />
           </button>
 
           {/* Breadcrumb (desktop) */}

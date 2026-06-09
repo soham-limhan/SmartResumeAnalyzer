@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Logo from '@/components/shared/Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -55,7 +56,7 @@ function HeroDashboardMockup() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-2.5 border-b border-border">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="" className="h-4 w-auto" />
+            <Logo size={16} showText={false} />
             <span className="text-xs font-bold text-foreground">ATS Optimization Radar</span>
           </div>
           <span className="text-[9px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
@@ -158,7 +159,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-5 md:px-10 py-3 flex items-center justify-between">
           {/* Logo */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1">
-            <img src="/logo.png" alt="Smart Resume Analyzer" className="h-8 w-auto" />
+            <Logo size={28} />
           </button>
 
           {/* Actions */}

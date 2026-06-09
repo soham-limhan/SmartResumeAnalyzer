@@ -1,4 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import Logo from '@/components/shared/Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload,
@@ -53,7 +54,7 @@ export default function Sidebar() {
           onClick={() => navigate('/')}
           className="flex-shrink-0 hover:scale-105 transition-transform"
         >
-          <img src="/logo.png" alt="Smart Resume Analyzer" className={collapsed ? 'h-7 w-auto' : 'h-8 w-auto'} />
+          <Logo size={collapsed ? 26 : 30} showText={!collapsed} />
         </button>
       </div>
 

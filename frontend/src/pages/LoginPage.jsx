@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Logo from '@/components/shared/Logo';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
@@ -93,7 +94,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-4">
-              <img src="/logo.png" alt="Smart Resume Analyzer" className="h-12 w-auto" />
+              <Logo size={40} />
             </div>
             <h1 className="text-2xl font-heading font-bold">Welcome Back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
