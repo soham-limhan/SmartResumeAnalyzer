@@ -263,3 +263,18 @@ class AIRecommendResponse(BaseModel):
     suggestions: list[str] = []
     priority_list: list[str] = []
 
+# ─── Feedback Schemas ─────────────────────────────────────────────────────────
+
+class FeedbackRequest(BaseModel):
+    """Request schema for submitting user feedback."""
+    name: str = Field(min_length=1, max_length=100)
+    role: str = Field(min_length=1, max_length=100)
+    quote: str = Field(min_length=5, max_length=1000)
+
+class FeedbackRecord(BaseModel):
+    """Stored feedback record with metadata."""
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    name: str
+    role: str
+    quote: str
+    created_at: datetime = Field(default_factory=datetime.now)

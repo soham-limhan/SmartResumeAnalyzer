@@ -92,6 +92,24 @@ export async function checkHealth() {
   return response.data;
 }
 
+// Get global stats
+export async function getStats() {
+  const response = await api.get('/stats');
+  return response.data;
+}
+
+// Get feedbacks
+export async function getFeedbacks() {
+  const response = await api.get('/feedback');
+  return response.data;
+}
+
+// Submit feedback
+export async function submitFeedback(name, role, quote) {
+  const response = await api.post('/feedback', { name, role, quote });
+  return response.data;
+}
+
 // Enhance resume with AI
 export async function enhanceResume(analysisId, mode, jobDescription = null) {
   const response = await api.post('/enhance', {

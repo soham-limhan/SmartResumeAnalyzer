@@ -18,11 +18,7 @@ const features = [
   { icon: MessageSquare, title: 'Interview Simulator', description: 'Generate realistic interview questions based directly on your parsed resume sections.' },
 ];
 
-const testimonials = [
-  { name: 'Priya Sharma', role: 'Software Engineer', company: 'Google', quote: 'SmartResume raised my matching score. I received multiple responses within days of optimizing my application.' },
-  { name: 'Marcus Chen', role: 'Product Manager', company: 'Stripe', quote: 'The builder layout is clean, and the keyword extraction is precise. It saved me hours of manual editing.' },
-  { name: 'Aisha Patel', role: 'Data Analyst', company: 'Meta', quote: 'Having direct recruiter feedback helped me understand exactly where my projects fell short.' },
-];
+
 
 const faqs = [
   { q: 'How does the ATS scoring work?', a: 'Our parsing pipeline replicates standard ATS algorithms. We inspect formatting, headers, date alignments, contact placements, and term frequencies to generate a compatibility percentage.' },
@@ -145,6 +141,57 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [openFAQ, setOpenFAQ] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [feedbackForm, setFeedbackForm] = useState({ name: '', role: '', quote: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statsData, setStatsData] = useState([
+    { value: 50000, suffix: '+', label: 'Resumes Audited' },
+    { value: 92, suffix: '%', label: 'ATS Alignment' },
+    { value: 45, suffix: 's', label: 'Processing Time' },
+    { value: 5, suffix: '/5', label: 'User Rating' },
+  ]);
+
+  useEffect(() => {
+    import('@/lib/api').then(({ getStats, getFeedbacks }) => {
+      getStats().then(data => {
+        if (data) {
+          setStatsData([
+            { value: data.resumes_audited, suffix: data.resumes_audited > 1000 ? '+' : '', label: 'Resumes Audited' },
+            { value: data.ats_alignment, suffix: '%', label: 'ATS Alignment' },
+            { value: data.processing_time, suffix: 's', label: 'Processing Time' },
+            { value: data.user_rating, suffix: '/5', label: 'User Rating' },
+          ]);
+        }
+      }).catch(console.error);
+
+      getFeedbacks().then(data => {
+        if (data && data.length > 0) {
+          setFeedbacks(data);
+        } else {
+          setFeedbacks([
+            { name: 'Priya Sharma', role: 'Software Engineer at Google', quote: 'SmartResume raised my matching score. I received multiple responses within days of optimizing my application.' },
+            { name: 'Marcus Chen', role: 'Product Manager at Stripe', quote: 'The builder layout is clean, and the keyword extraction is precise. It saved me hours of manual editing.' }
+          ]);
+        }
+      }).catch(console.error);
+    });
+  }, []);
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const { submitFeedback } = await import('@/lib/api');
+      const newFeedback = await submitFeedback(feedbackForm.name, feedbackForm.role, feedbackForm.quote);
+      setFeedbacks([newFeedback, ...feedbacks]);
+      setFeedbackForm({ name: '', role: '', quote: '' });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -237,12 +284,7 @@ export default function LandingPage() {
       <section className="relative z-10 py-8 border-y border-border bg-card/50">
         <div className="max-w-5xl mx-auto px-5 md:px-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              { value: 50000, suffix: '+', label: 'Resumes Audited' },
-              { value: 92, suffix: '%', label: 'ATS Alignment' },
-              { value: 45, suffix: 's', label: 'Processing Time' },
-              { value: 5, suffix: '/5', label: 'User Rating' },
-            ].map(({ value, suffix, label }) => (
+            {statsData.map(({ value, suffix, label }) => (
               <div key={label} className="space-y-1">
                 <span className="text-xl sm:text-2xl font-extrabold text-foreground">
                   <AnimatedCounter target={value} suffix={suffix} />
@@ -279,23 +321,67 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ───────────────────────────────────────── */}
-      <section id="testimonials" className="py-16 border-t border-border bg-card/10">
+      {/* ── FEEDBACK ───────────────────────────────────────── */}
+      <section id="feedback" className="py-16 border-t border-border bg-card/10">
         <div className="max-w-7xl mx-auto px-5 md:px-10">
           <div className="text-center max-w-xl mx-auto mb-12 space-y-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">Approved by Professionals</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Hear from candidates who secured offers at top tech firms.</p>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">Community Feedback</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">See what others are saying or share your own experience.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, idx) => (
-              <div key={idx} className="bg-card border border-border p-6 rounded-xl space-y-4">
-                <p className="text-xs text-muted-foreground italic leading-relaxed">"{t.quote}"</p>
-                <div>
-                  <h4 className="text-xs font-bold text-foreground">{t.name}</h4>
-                  <p className="text-[10px] text-muted-foreground">{t.role} at <span className="text-primary font-semibold">{t.company}</span></p>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Feedback List */}
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 content-start">
+              {feedbacks.slice(0, 4).map((t, idx) => (
+                <div key={idx} className="bg-card border border-border p-6 rounded-xl space-y-4">
+                  <p className="text-xs text-muted-foreground italic leading-relaxed">"{t.quote}"</p>
+                  <div>
+                    <h4 className="text-xs font-bold text-foreground">{t.name}</h4>
+                    <p className="text-[10px] text-muted-foreground">{t.role}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Feedback Form */}
+            <div className="bg-card border border-border p-6 rounded-xl h-fit">
+              <h3 className="text-sm font-bold text-foreground mb-4">Share your thoughts</h3>
+              <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Your Name"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary"
+                    value={feedbackForm.name}
+                    onChange={e => setFeedbackForm({...feedbackForm, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Your Role & Company"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary"
+                    value={feedbackForm.role}
+                    onChange={e => setFeedbackForm({...feedbackForm, role: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <textarea
+                    required
+                    placeholder="Your feedback..."
+                    rows={4}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary resize-none"
+                    value={feedbackForm.quote}
+                    onChange={e => setFeedbackForm({...feedbackForm, quote: e.target.value})}
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmitting} className="w-full text-xs font-bold">
+                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
       </section>
