@@ -1,9 +1,9 @@
 /**
- * SmartResume — inline SVG logo component.
+ * ProfileX AI — inline SVG logo component.
  *
  * Props:
  *   size       – icon height in px  (default 32)
- *   showText   – render the "SmartResume" wordmark beside the icon (default true)
+ *   showText   – render the "ProfileX AI" wordmark beside the icon (default true)
  *   className  – forwarded to the outer wrapper
  */
 export default function Logo({ size = 32, showText = true, className = '' }) {

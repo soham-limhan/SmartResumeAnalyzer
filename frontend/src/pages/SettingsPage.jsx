@@ -29,7 +29,7 @@ export default function SettingsPage() {
 
   const clearHistory = () => {
     if (window.confirm('Are you sure you want to clear all analysis history? This cannot be undone.')) {
-      localStorage.removeItem('smartresume-history');
+      localStorage.removeItem('profilex-ai-history');
       window.location.reload();
     }
   };
@@ -174,7 +174,7 @@ export default function SettingsPage() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <GlassCard hover={false}>
                 <div className="text-center text-sm text-muted-foreground">
-                  <p className="font-heading font-semibold text-foreground mb-1">ResumePilot v1.0.0</p>
+                  <p className="font-heading font-semibold text-foreground mb-1">ProfileX AI v1.0.0</p>
                   <p>AI-powered resume analysis platform</p>
                   <p className="text-xs mt-2">Built with React • FastAPI • Ollama</p>
                 </div>

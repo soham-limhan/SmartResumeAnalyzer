@@ -129,8 +129,8 @@ export default function SocialLinksManager({ onChange }) {
       setError(null);
       
       // Try local storage first
-      const cached = localStorage.getItem('smartresume-social-links');
-      const cachedMode = localStorage.getItem('smartresume-social-mode');
+      const cached = localStorage.getItem('profilex-ai-social-links');
+      const cachedMode = localStorage.getItem('profilex-ai-social-mode');
       if (cachedMode) setDisplayMode(cachedMode);
 
       if (user) {
@@ -142,8 +142,8 @@ export default function SocialLinksManager({ onChange }) {
             const sorted = (res.data.links || []).sort((a, b) => a.order - b.order);
             setLinks(sorted);
             setDisplayMode(res.data.display_mode || 'compact');
-            localStorage.setItem('smartresume-social-links', JSON.stringify(sorted));
-            localStorage.setItem('smartresume-social-mode', res.data.display_mode || 'compact');
+            localStorage.setItem('profilex-ai-social-links', JSON.stringify(sorted));
+            localStorage.setItem('profilex-ai-social-mode', res.data.display_mode || 'compact');
           } else if (cached) {
             setLinks(JSON.parse(cached));
           }
@@ -256,8 +256,8 @@ export default function SocialLinksManager({ onChange }) {
     setError(null);
 
     // Save to local storage
-    localStorage.setItem('smartresume-social-links', JSON.stringify(links));
-    localStorage.setItem('smartresume-social-mode', displayMode);
+    localStorage.setItem('profilex-ai-social-links', JSON.stringify(links));
+    localStorage.setItem('profilex-ai-social-mode', displayMode);
 
     if (user) {
       try {

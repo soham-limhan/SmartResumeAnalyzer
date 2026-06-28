@@ -170,7 +170,7 @@ export default function LandingPage() {
           setFeedbacks(data);
         } else {
           setFeedbacks([
-            { name: 'Priya Sharma', role: 'Software Engineer at Google', quote: 'SmartResume raised my matching score. I received multiple responses within days of optimizing my application.' },
+            { name: 'Priya Sharma', role: 'Software Engineer at Google', quote: 'ProfileX AI raised my matching score. I received multiple responses within days of optimizing my application.' },
             { name: 'Marcus Chen', role: 'Product Manager at Stripe', quote: 'The builder layout is clean, and the keyword extraction is precise. It saved me hours of manual editing.' }
           ]);
         }
@@ -411,7 +411,7 @@ export default function LandingPage() {
 
       {/* ── FOOTER ─────────────────────────────────────────────── */}
       <footer className="py-10 border-t border-border text-center text-[10.5px] text-muted-foreground bg-card/60">
-        <p>© 2026 SmartResume. Designed with high fidelity, ATS compliance, and data privacy.</p>
+        <p>© 2026 ProfileX AI. Designed with high fidelity, ATS compliance, and data privacy.</p>
       </footer>
     </div>
   );

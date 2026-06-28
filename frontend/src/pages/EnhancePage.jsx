@@ -254,7 +254,7 @@ export default function EnhancePage() {
               AI Resume Enhancement
             </h1>
             <p className="text-xs text-muted-foreground truncate">
-              {filename}{analysisData ? ' · Powered by Smart Resume AI' : ''}
+              {filename}{analysisData ? ' · Powered by ProfileX AI AI' : ''}
             </p>
           </div>
 

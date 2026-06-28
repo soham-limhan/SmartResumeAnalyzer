@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
             print(f"[OK]      Groq connection successful ({len(models.data)} models available)")
         except Exception as e:
             print(f"[WARN]    Groq connection check failed: {e}")
-            print("          Analysis may fail. Check your SMARTRESUME_GROQ_API_KEY.")
+            print("          Analysis may fail. Check your PROFILEX_AI_GROQ_API_KEY.")
     else:
         print(f"[AI]      Ollama model: {settings.ollama_model} @ {settings.ollama_host}")
         try:
@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    print("[SHUTDOWN] ResumePilot API shutting down...")
+    print("[SHUTDOWN] ProfileX AI API shutting down...")
 
 
 app = FastAPI(

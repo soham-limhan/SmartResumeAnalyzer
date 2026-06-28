@@ -41,7 +41,7 @@ def init_firebase():
         else:
             raise FileNotFoundError(
                 f"No Firebase credentials found. "
-                f"Set SMARTRESUME_FIREBASE_CREDENTIALS_BASE64 env var "
+                f"Set PROFILEX_AI_FIREBASE_CREDENTIALS_BASE64 env var "
                 f"or place firebase-key.json at: {settings.firebase_credentials_path}"
             )
 

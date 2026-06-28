@@ -480,7 +480,7 @@ export function generateEnhancedPDF(enhancedResume, filename = 'enhanced_resume.
     doc.setFontSize(FONT_SIZES.footer);
     doc.setFont('helvetica', 'italic');
     doc.text(
-      `Enhanced by Smart Resume Analyzer AI  ·  Page ${i} of ${pageCount}`,
+      `Enhanced by ProfileX AI Analyzer AI  ·  Page ${i} of ${pageCount}`,
       PAGE_W / 2,
       PAGE_H - 8,
       { align: 'center' }

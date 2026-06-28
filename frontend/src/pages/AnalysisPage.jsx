@@ -56,7 +56,7 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(!data);
   const [exporting, setExporting] = useState(false);
   const [activeSocialLinks] = useState(() => {
-    const cached = localStorage.getItem('smartresume-social-links');
+    const cached = localStorage.getItem('profilex-ai-social-links');
     if (cached) {
       try {
         const parsed = JSON.parse(cached);

@@ -155,7 +155,7 @@ export default function ResumeBuilderPage() {
   // Load draft on mount
   useEffect(() => {
     const loadDraft = async () => {
-      const cached = localStorage.getItem('smartresume-builder-data');
+      const cached = localStorage.getItem('profilex-ai-builder-data');
       if (cached) {
         try {
           setResumeData(JSON.parse(cached));
@@ -173,7 +173,7 @@ export default function ResumeBuilderPage() {
             // Take the most recent resume
             const dbResume = res.data[0];
             setResumeData(dbResume);
-            localStorage.setItem('smartresume-builder-data', JSON.stringify(dbResume));
+            localStorage.setItem('profilex-ai-builder-data', JSON.stringify(dbResume));
           }
         } catch (err) {
           console.error('Failed to fetch resume from database', err);
@@ -186,7 +186,7 @@ export default function ResumeBuilderPage() {
   // Autosave to localStorage on state changes
   useEffect(() => {
     if (resumeData !== INITIAL_RESUME_STATE) {
-      localStorage.setItem('smartresume-builder-data', JSON.stringify(resumeData));
+      localStorage.setItem('profilex-ai-builder-data', JSON.stringify(resumeData));
     }
   }, [resumeData]);
 

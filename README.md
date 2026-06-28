@@ -1,8 +1,8 @@
-# SmartResume — AI Resume Analyzer
+# ProfileX AI — AI Resume Analyzer
 
 A production-grade AI-powered resume analysis platform with a futuristic dark glassmorphism UI.
 
-![SmartResume](https://img.shields.io/badge/SmartResume-AI%20Resume%20Analyzer-6366f1?style=for-the-badge)
+![ProfileX AI](https://img.shields.io/badge/ProfileX AI-AI%20Resume%20Analyzer-6366f1?style=for-the-badge)
 
 ## Tech Stack
 
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 **Option A — Groq Cloud (recommended):**
 ```bash
 # Create .env file
-echo SMARTRESUME_GROQ_API_KEY=gsk_your_key_here > .env
+echo PROFILEX_AI_GROQ_API_KEY=gsk_your_key_here > .env
 python run.py
 ```
 
@@ -93,9 +93,9 @@ Open `http://localhost:5173` — the Vite proxy routes API calls to the backend.
 
    | Variable | Value |
    |---|---|
-   | `SMARTRESUME_GROQ_API_KEY` | Your Groq API key |
-   | `SMARTRESUME_CORS_ORIGINS` | `["https://your-app.vercel.app"]` |
-   | `SMARTRESUME_DEBUG` | `false` |
+   | `PROFILEX_AI_GROQ_API_KEY` | Your Groq API key |
+   | `PROFILEX_AI_CORS_ORIGINS` | `["https://your-app.vercel.app"]` |
+   | `PROFILEX_AI_DEBUG` | `false` |
 
 ### Get Groq API Key (Free)
 
@@ -109,12 +109,12 @@ Open `http://localhost:5173` — the Vite proxy routes API calls to the backend.
 
 | Variable | Default | Description |
 |---|---|---|
-| `SMARTRESUME_GROQ_API_KEY` | None | Groq API key (enables cloud AI) |
-| `SMARTRESUME_GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model ID |
-| `SMARTRESUME_OLLAMA_HOST` | `http://localhost:11434` | Ollama host (local fallback) |
-| `SMARTRESUME_OLLAMA_MODEL` | `resume-analyzer` | Ollama model name |
-| `SMARTRESUME_CORS_ORIGINS` | `["http://localhost:5173"]` | Allowed CORS origins |
-| `SMARTRESUME_DEBUG` | `true` | Debug mode |
+| `PROFILEX_AI_GROQ_API_KEY` | None | Groq API key (enables cloud AI) |
+| `PROFILEX_AI_GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model ID |
+| `PROFILEX_AI_OLLAMA_HOST` | `http://localhost:11434` | Ollama host (local fallback) |
+| `PROFILEX_AI_OLLAMA_MODEL` | `resume-analyzer` | Ollama model name |
+| `PROFILEX_AI_CORS_ORIGINS` | `["http://localhost:5173"]` | Allowed CORS origins |
+| `PROFILEX_AI_DEBUG` | `true` | Debug mode |
 | `VITE_API_URL` | `/api` | Backend URL (frontend, production only) |
 
 ---
@@ -122,7 +122,7 @@ Open `http://localhost:5173` — the Vite proxy routes API calls to the backend.
 ## Project Structure
 
 ```
-SmartResume/
+ProfileX AI/
 ├── frontend/               # React + Vite SPA
 │   ├── src/
 │   │   ├── components/     # UI components

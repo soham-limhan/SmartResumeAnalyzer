@@ -1,4 +1,4 @@
-"""Uvicorn runner for the ResumePilot backend."""
+"""Uvicorn runner for the ProfileX AI backend."""
 
 import uvicorn
 

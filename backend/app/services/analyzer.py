@@ -1,7 +1,7 @@
 """AI analysis service for resume evaluation.
 
 Supports two providers:
-  - Groq Cloud (primary, when SMARTRESUME_GROQ_API_KEY is set)
+  - Groq Cloud (primary, when PROFILEX_AI_GROQ_API_KEY is set)
   - Ollama Local (fallback, for local development)
 """
 
@@ -157,7 +157,7 @@ async def analyze_resume(
             error_str = str(e).lower()
             if "authentication" in error_str or "api_key" in error_str:
                 raise RuntimeError(
-                    "Groq API key is invalid. Check your SMARTRESUME_GROQ_API_KEY."
+                    "Groq API key is invalid. Check your PROFILEX_AI_GROQ_API_KEY."
                 ) from e
             if "rate_limit" in error_str:
                 raise RuntimeError(

@@ -412,7 +412,7 @@ def _generate_docx(enhanced: "EnhancedResume", social_links: list = None, displa
 
     # ── Footer ──
     doc.add_paragraph()
-    footer_para = doc.add_paragraph("✨ Enhanced by Smart Resume Analyzer AI")
+    footer_para = doc.add_paragraph("✨ Enhanced by ProfileX AI Analyzer AI")
     footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in footer_para.runs:
         run.font.size = Pt(8)

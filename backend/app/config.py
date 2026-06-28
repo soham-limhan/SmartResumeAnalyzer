@@ -8,11 +8,11 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    app_name: str = "ResumePilot API"
+    app_name: str = "ProfileX AI API"
     app_version: str = "1.0.0"
     debug: bool = True
 
-    # AI Provider — set SMARTRESUME_GROQ_API_KEY to use Groq cloud,
+    # AI Provider — set PROFILEX_AI_GROQ_API_KEY to use Groq cloud,
     # otherwise falls back to local Ollama.
     groq_api_key: Optional[str] = None
     groq_model: str = "llama-3.3-70b-versatile"
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        env_prefix = "SMARTRESUME_"
+        env_prefix = "PROFILEX_AI_"
 
 
 settings = Settings()

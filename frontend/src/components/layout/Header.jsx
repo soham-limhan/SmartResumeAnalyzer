@@ -23,7 +23,7 @@ export default function Header() {
   const matchedKey = Object.keys(routeMeta).find(k =>
     k === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(k)
   );
-  const meta = routeMeta[matchedKey] || { title: 'SmartResume', breadcrumb: ['Dashboard'] };
+  const meta = routeMeta[matchedKey] || { title: 'ProfileX AI', breadcrumb: ['Dashboard'] };
   const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'G';
 
   return (

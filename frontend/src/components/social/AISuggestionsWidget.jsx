@@ -12,7 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function AISuggestionsWidget({ currentLinks = [], onAddPlatform }) {
   const [targetRole, setTargetRole] = useState(() => {
-    const history = localStorage.getItem('smartresume-history');
+    const history = localStorage.getItem('profilex-ai-history');
     if (history) {
       try {
         const parsed = JSON.parse(history);

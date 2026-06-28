@@ -15,10 +15,10 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
 
   // New State for Social Links Integration on download
   const [exportMode, setExportMode] = useState(() => {
-    return localStorage.getItem('smartresume-social-mode') || 'compact';
+    return localStorage.getItem('profilex-ai-social-mode') || 'compact';
   });
   const [socialLinks] = useState(() => {
-    const cachedLinks = localStorage.getItem('smartresume-social-links');
+    const cachedLinks = localStorage.getItem('profilex-ai-social-links');
     if (cachedLinks) {
       try {
         return JSON.parse(cachedLinks);
@@ -147,7 +147,7 @@ export default function DownloadPanel({ enhancedResume, enhancementId, mode, can
                 key={m.id}
                 onClick={() => {
                   setExportMode(m.id);
-                  localStorage.setItem('smartresume-social-mode', m.id);
+                  localStorage.setItem('profilex-ai-social-mode', m.id);
                 }}
                 className={`py-1.5 px-2 rounded-lg border text-[10.5px] font-bold transition-all text-center
                   ${exportMode === m.id

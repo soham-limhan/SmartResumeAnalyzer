@@ -8,7 +8,7 @@ const ThemeContext = createContext({
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('smartresume-theme') || 'dark';
+      return localStorage.getItem('profilex-ai-theme') || 'dark';
     }
     return 'dark';
   });
@@ -20,7 +20,7 @@ export function ThemeProvider({ children }) {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('smartresume-theme', theme);
+    localStorage.setItem('profilex-ai-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
