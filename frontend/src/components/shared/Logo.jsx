@@ -58,7 +58,7 @@ export default function Logo({ size = 32, showText = true, className = '' }) {
           className="font-heading font-extrabold tracking-tight text-foreground"
           style={{ fontSize, lineHeight: 1.1 }}
         >
-          Smart<span className="text-primary">Resume</span>
+          ProfileX <span className="text-primary">AI</span>
         </span>
       )}
     </span>
