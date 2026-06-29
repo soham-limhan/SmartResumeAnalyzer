@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, BookOpen, Briefcase, Award, FolderGit, Layout,
   Plus, Trash2, ArrowLeft, ArrowRight, Download, FileText,
-  Sparkles, CheckCircle, AlertCircle, Printer, Wrench
+  Sparkles, CheckCircle, AlertCircle, Printer, Wrench, Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,15 @@ import { useAuth } from '@/context/AuthContext';
 import ResumeTemplates, { AutoSizedPreview } from '@/components/enhance/ResumeTemplates';
 import { exportBuilderResumePDF } from '@/lib/builderPdfExport';
 import axios from 'axios';
+
+// Import flow components
+import ImportStartModal from '@/components/resume-import/ImportStartModal';
+import ImportUploadModal from '@/components/resume-import/ImportUploadModal';
+import ImportProgressModal from '@/components/resume-import/ImportProgressModal';
+import ImportReviewModal from '@/components/resume-import/ImportReviewModal';
+import SmartMergeDialog from '@/components/resume-import/SmartMergeDialog';
+import ImportErrorPanel from '@/components/resume-import/ImportErrorPanel';
+import { detectConflicts, applyMergeDecisions, mapImportedToBuilderSchema } from '@/lib/resumeImportUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -67,6 +76,124 @@ export default function ResumeBuilderPage() {
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [pageBudget, setPageBudget] = useState(1);
+
+  // ── Import flow state ─────────────────────────────────────────────────────
+  // Show the start modal only once per session (not if user already has data)
+  const [importFlow, setImportFlow] = useState('start'); // 'start'|'upload'|'progress'|'review'|'merge'|'error'|'done'
+  const [showImportModals, setShowImportModals] = useState(false);
+  const [importedRawData, setImportedRawData] = useState(null);   // raw ImportedResume from API
+  const [importedMapped, setImportedMapped] = useState(null);     // builder-schema mapped data
+  const [mergeConflicts, setMergeConflicts] = useState([]);
+  const [importError, setImportError] = useState('');
+  const [importDone, setImportDone] = useState(false);            // signals progress modal to complete
+  const [importAuthToken, setImportAuthToken] = useState(null);
+
+  // Determine if we should show the start modal on mount
+  useEffect(() => {
+    const seen = localStorage.getItem('profilex-import-seen');
+    if (!seen) {
+      setShowImportModals(true);
+      setImportFlow('start');
+    }
+  }, []);
+
+  // Cache the auth token for the upload request
+  useEffect(() => {
+    if (user) {
+      getToken().then(t => setImportAuthToken(t || null));
+    }
+  }, [user, getToken]);
+
+  // ── Import flow handlers ──────────────────────────────────────────────────
+
+  const openImportFlow = useCallback(() => {
+    setImportFlow('upload');
+    setShowImportModals(true);
+    setImportError('');
+    setImportedRawData(null);
+    setImportedMapped(null);
+    setImportDone(false);
+  }, []);
+
+  const dismissAllImportModals = useCallback(() => {
+    setShowImportModals(false);
+    setImportFlow('done');
+    localStorage.setItem('profilex-import-seen', '1');
+  }, []);
+
+  const handleImportStart = useCallback(() => {
+    // Scratch — dismiss modal
+    dismissAllImportModals();
+  }, [dismissAllImportModals]);
+
+  const handleImportChoose = useCallback(() => {
+    // User chose to import
+    setImportFlow('upload');
+  }, []);
+
+  const handleUploadStart = useCallback(() => {
+    // File uploaded — show progress animation
+    setImportFlow('progress');
+    setImportDone(false);
+  }, []);
+
+  const handleUploadSuccess = useCallback((rawImported) => {
+    // API responded — store raw data, signal progress to finish
+    setImportedRawData(rawImported);
+    setImportDone(true);
+
+    // Brief pause so the final progress step animates before transitioning
+    setTimeout(() => {
+      // Check for conflicts with existing builder data
+      const mapped = mapImportedToBuilderSchema(rawImported);
+      setImportedMapped(mapped);
+
+      const conflicts = detectConflicts(resumeData, mapped);
+      if (conflicts.length > 0) {
+        setMergeConflicts(conflicts);
+        setImportFlow('merge');
+      } else {
+        setImportFlow('review');
+      }
+    }, 1200);
+  }, [resumeData]);
+
+  const handleUploadError = useCallback((errorMsg, rawText) => {
+    setImportError(errorMsg || 'Import failed. Please try again.');
+    setImportFlow('error');
+  }, []);
+
+  const handleMergeResolve = useCallback((decisions) => {
+    // Apply merge decisions and proceed to review
+    const merged = applyMergeDecisions(resumeData, importedMapped, decisions);
+    setImportedMapped(merged);
+    // Rebuild a pseudo-ImportedResume so the review modal can show it
+    // (review modal gets the raw importedRawData)
+    setImportFlow('review');
+  }, [resumeData, importedMapped]);
+
+  const handleImportComplete = useCallback((builderData) => {
+    // Merge tools into the builder schema (keep existing designTemplate)
+    const finalData = {
+      ...builderData,
+      designTemplate: resumeData.designTemplate,
+      id: resumeData.id, // preserve existing resume ID if any
+    };
+    setResumeData(finalData);
+    localStorage.setItem('profilex-ai-builder-data', JSON.stringify(finalData));
+    if (user) syncToDatabase(finalData);
+    dismissAllImportModals();
+  }, [resumeData, user, dismissAllImportModals]);
+
+  const handleImportRetry = useCallback(() => {
+    setImportFlow('upload');
+    setImportError('');
+    setImportDone(false);
+  }, []);
+
+  const handleImportManualEdit = useCallback(() => {
+    dismissAllImportModals();
+  }, [dismissAllImportModals]);
 
   // Compute preview data containing in-progress input values
   const getPreviewResumeData = () => {
@@ -418,6 +545,62 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-stretch max-w-7xl mx-auto">
+
+      {/* ── Import flow modals ─────────────────────────────────────────────── */}
+      {showImportModals && importFlow === 'start' && (
+        <ImportStartModal
+          isOpen
+          onScratch={handleImportStart}
+          onImport={handleImportChoose}
+        />
+      )}
+
+      {showImportModals && importFlow === 'upload' && (
+        <ImportUploadModal
+          isOpen
+          onClose={dismissAllImportModals}
+          onUploadStart={handleUploadStart}
+          onSuccess={handleUploadSuccess}
+          onError={handleUploadError}
+          token={importAuthToken}
+        />
+      )}
+
+      {showImportModals && importFlow === 'progress' && (
+        <ImportProgressModal
+          isOpen
+          isDone={importDone}
+        />
+      )}
+
+      {showImportModals && importFlow === 'review' && importedRawData && (
+        <ImportReviewModal
+          isOpen
+          importedData={importedRawData}
+          onConfirm={handleImportComplete}
+          onCancel={dismissAllImportModals}
+        />
+      )}
+
+      {showImportModals && importFlow === 'merge' && (
+        <SmartMergeDialog
+          isOpen
+          conflicts={mergeConflicts}
+          onResolve={handleMergeResolve}
+          onCancel={dismissAllImportModals}
+        />
+      )}
+
+      {showImportModals && importFlow === 'error' && (
+        <ImportErrorPanel
+          isOpen
+          errorMsg={importError}
+          rawText={null}
+          onRetry={handleImportRetry}
+          onManualEdit={handleImportManualEdit}
+          onClose={dismissAllImportModals}
+        />
+      )}
       {/* Left: Input Form Controls */}
       <div className="flex-1 space-y-6">
         {/* Step Indicator Header */}
@@ -427,17 +610,28 @@ export default function ResumeBuilderPage() {
               <h2 className="text-base font-bold text-foreground">Build Your Professional Resume</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Draft saved automatically.</p>
             </div>
-            {user && (
-              <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-                {saving ? (
-                  <span>Syncing...</span>
-                ) : syncSuccess ? (
-                  <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> Draft Saved</span>
-                ) : (
-                  <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> Sync Active</span>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {/* Import resume button */}
+              <button
+                onClick={openImportFlow}
+                className="flex items-center gap-1.5 text-[10.5px] font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 px-2.5 py-1 rounded-full transition-all"
+              >
+                <Upload className="w-3 h-3" />
+                Import Resume
+              </button>
+
+              {user && (
+                <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                  {saving ? (
+                    <span>Syncing...</span>
+                  ) : syncSuccess ? (
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> Draft Saved</span>
+                  ) : (
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> Sync Active</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1">

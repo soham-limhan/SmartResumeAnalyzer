@@ -278,3 +278,83 @@ class FeedbackRecord(BaseModel):
     role: str
     quote: str
     created_at: datetime = Field(default_factory=datetime.now)
+
+
+# ─── Resume Import Schemas ─────────────────────────────────────────────────────
+
+class ConfidenceField(BaseModel):
+    """A single extracted field with its confidence score (0-100)."""
+    value: Optional[Union[str, bool, List[str]]] = None
+    confidence: int = Field(default=0, ge=0, le=100)
+
+
+class ImportedPersonal(BaseModel):
+    """Extracted personal information fields."""
+    fullName: ConfidenceField = Field(default_factory=ConfidenceField)
+    professionalTitle: ConfidenceField = Field(default_factory=ConfidenceField)
+    email: ConfidenceField = Field(default_factory=ConfidenceField)
+    phone: ConfidenceField = Field(default_factory=ConfidenceField)
+    location: ConfidenceField = Field(default_factory=ConfidenceField)
+    linkedin: ConfidenceField = Field(default_factory=ConfidenceField)
+    github: ConfidenceField = Field(default_factory=ConfidenceField)
+    portfolioWebsite: ConfidenceField = Field(default_factory=ConfidenceField)
+
+
+class ImportedEducation(BaseModel):
+    """A single extracted education entry."""
+    degree: ConfidenceField = Field(default_factory=ConfidenceField)
+    institution: ConfidenceField = Field(default_factory=ConfidenceField)
+    startDate: ConfidenceField = Field(default_factory=ConfidenceField)
+    endDate: ConfidenceField = Field(default_factory=ConfidenceField)
+    gpa: ConfidenceField = Field(default_factory=ConfidenceField)
+    location: ConfidenceField = Field(default_factory=ConfidenceField)
+    description: ConfidenceField = Field(default_factory=ConfidenceField)
+
+
+class ImportedExperience(BaseModel):
+    """A single extracted work experience entry."""
+    jobTitle: ConfidenceField = Field(default_factory=ConfidenceField)
+    company: ConfidenceField = Field(default_factory=ConfidenceField)
+    employmentType: ConfidenceField = Field(default_factory=ConfidenceField)
+    location: ConfidenceField = Field(default_factory=ConfidenceField)
+    startDate: ConfidenceField = Field(default_factory=ConfidenceField)
+    endDate: ConfidenceField = Field(default_factory=ConfidenceField)
+    current: ConfidenceField = Field(default_factory=ConfidenceField)
+    responsibilities: ConfidenceField = Field(default_factory=ConfidenceField)
+    achievements: ConfidenceField = Field(default_factory=ConfidenceField)
+
+
+class ImportedProject(BaseModel):
+    """A single extracted project entry."""
+    projectName: ConfidenceField = Field(default_factory=ConfidenceField)
+    description: ConfidenceField = Field(default_factory=ConfidenceField)
+    technologies: ConfidenceField = Field(default_factory=ConfidenceField)
+    githubLink: ConfidenceField = Field(default_factory=ConfidenceField)
+    liveLink: ConfidenceField = Field(default_factory=ConfidenceField)
+
+
+class ImportedSkills(BaseModel):
+    """Extracted and categorized skills."""
+    technical: ConfidenceField = Field(default_factory=ConfidenceField)
+    soft: ConfidenceField = Field(default_factory=ConfidenceField)
+    tools: ConfidenceField = Field(default_factory=ConfidenceField)
+    languages: ConfidenceField = Field(default_factory=ConfidenceField)
+
+
+class ImportedResume(BaseModel):
+    """Complete structured response from the resume import AI extraction pipeline."""
+    personal: ImportedPersonal = Field(default_factory=ImportedPersonal)
+    summary: ConfidenceField = Field(default_factory=ConfidenceField)
+    education: List[ImportedEducation] = Field(default_factory=list)
+    experience: List[ImportedExperience] = Field(default_factory=list)
+    projects: List[ImportedProject] = Field(default_factory=list)
+    skills: ImportedSkills = Field(default_factory=ImportedSkills)
+    certifications: ConfidenceField = Field(default_factory=ConfidenceField)
+    achievements: ConfidenceField = Field(default_factory=ConfidenceField)
+    volunteer: ConfidenceField = Field(default_factory=ConfidenceField)
+    interests: ConfidenceField = Field(default_factory=ConfidenceField)
+    references: ConfidenceField = Field(default_factory=ConfidenceField)
+    # Metadata about the extraction
+    extracted_text_length: int = 0
+    filename: str = ""
+
