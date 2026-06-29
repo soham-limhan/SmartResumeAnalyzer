@@ -1,7 +1,8 @@
 """Application configuration and settings."""
 
 import os
-from typing import Optional
+from typing import Optional, List
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -31,12 +32,27 @@ class Settings(BaseSettings):
     firebase_credentials_base64: Optional[str] = None
 
     # CORS
-    cors_origins: list[str] = [
+    # Set PROFILEX_AI_CORS_ORIGINS as a comma-separated list on Render to
+    # add production domains without changing code.
+    # Example: https://myapp.onrender.com,https://myapp.com
+    cors_origins: List[str] = [
+        # Production
+        "https://smartresumeanalyzer-nt3b.onrender.com",
+        # Local development
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
     ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Accept either a list (from default) or a comma-separated string (from env var)."""
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     # Upload
     max_upload_size_mb: int = 10
