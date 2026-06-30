@@ -58,6 +58,130 @@ const STEPS = [
   { id: 6, label: 'Design', icon: Layout },
 ];
 
+// ── ProjectCard: expandable inline-edit card for each project ────────────────
+function ProjectCard({ item, onRemove, onUpdate }) {
+  const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(null);
+
+  const startEdit = (e) => {
+    e.stopPropagation();
+    setDraft({
+      ...item,
+      technologies: Array.isArray(item.technologies) ? item.technologies.join(', ') : (item.technologies || ''),
+    });
+    setExpanded(true);
+    setEditing(true);
+  };
+
+  const saveEdit = () => {
+    const techList = typeof draft.technologies === 'string'
+      ? draft.technologies.split(',').map(t => t.trim()).filter(Boolean)
+      : draft.technologies || [];
+    onUpdate({ ...draft, technologies: techList });
+    setEditing(false);
+    setDraft(null);
+  };
+
+  const cancelEdit = () => { setEditing(false); setDraft(null); };
+
+  const techDisplay = Array.isArray(item.technologies) ? item.technologies.join(', ') : '';
+
+  return (
+    <div className="rounded-xl border border-border bg-muted/30 overflow-hidden">
+      {/* Header row — always visible */}
+      <div className="flex justify-between items-center p-3">
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="flex-1 text-left group"
+        >
+          <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{item.projectName || 'Untitled Project'}</p>
+          {techDisplay && (
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-mono truncate max-w-xs">Tech: {techDisplay}</p>
+          )}
+          {item.description && !expanded && (
+            <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic truncate max-w-xs">{item.description}</p>
+          )}
+        </button>
+        <div className="flex items-center gap-1 ml-2 shrink-0">
+          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={startEdit} title="Edit project">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </Button>
+          <Button size="icon" variant="ghost" className="h-7 w-7 hover:text-red-400" onClick={onRemove}>
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Expanded / editing body */}
+      {expanded && !editing && item.description && (
+        <div className="px-3 pb-3 border-t border-border/30 pt-2">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Description</p>
+          <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">{item.description}</p>
+        </div>
+      )}
+
+      {editing && draft && (
+        <div className="px-3 pb-3 border-t border-border/30 pt-3 space-y-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase">Project Name</label>
+              <input
+                className="w-full text-xs bg-background border border-border rounded-md px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                value={draft.projectName}
+                onChange={e => setDraft(d => ({ ...d, projectName: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase">Technologies</label>
+              <input
+                className="w-full text-xs bg-background border border-border rounded-md px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                value={draft.technologies}
+                onChange={e => setDraft(d => ({ ...d, technologies: e.target.value }))}
+                placeholder="React, Node.js, ..."
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase">GitHub Link</label>
+              <input
+                className="w-full text-xs bg-background border border-border rounded-md px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                value={draft.githubLink}
+                onChange={e => setDraft(d => ({ ...d, githubLink: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase">Live Demo URL</label>
+              <input
+                className="w-full text-xs bg-background border border-border rounded-md px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                value={draft.liveDemoLink}
+                onChange={e => setDraft(d => ({ ...d, liveDemoLink: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase">Project Description</label>
+            <textarea
+              rows={4}
+              className="w-full text-xs bg-background border border-border rounded-md px-2.5 py-1.5 text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/40"
+              value={draft.description}
+              onChange={e => setDraft(d => ({ ...d, description: e.target.value }))}
+              placeholder="Describe what this project does and your contributions..."
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={saveEdit} className="h-7 text-[11px] px-3 rounded-md gap-1">
+              <CheckCircle className="w-3 h-3" /> Save
+            </Button>
+            <Button size="sm" variant="ghost" onClick={cancelEdit} className="h-7 text-[11px] px-3 rounded-md text-muted-foreground">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ResumeBuilderPage() {
   const { user, getToken } = useAuth();
   const [activeStep, setActiveStep] = useState(1);
@@ -891,17 +1015,21 @@ export default function ResumeBuilderPage() {
                   {resumeData.projects.length > 0 && (
                     <div className="space-y-2.5">
                       {resumeData.projects.map(item => (
-                        <div key={item.id} className="flex justify-between items-center p-3 rounded-xl border border-border bg-muted/30">
-                          <div>
-                            <p className="text-xs font-bold text-foreground">{item.projectName}</p>
-                            {item.technologies && item.technologies.length > 0 && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">Tech: {item.technologies.join(', ')}</p>
-                            )}
-                          </div>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-red-400" onClick={() => removeProject(item.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <ProjectCard
+                          key={item.id}
+                          item={item}
+                          onRemove={() => removeProject(item.id)}
+                          onUpdate={(updatedItem) => {
+                            setResumeData(prev => {
+                              const updated = {
+                                ...prev,
+                                projects: prev.projects.map(p => p.id === updatedItem.id ? updatedItem : p)
+                              };
+                              syncToDatabase(updated);
+                              return updated;
+                            });
+                          }}
+                        />
                       ))}
                     </div>
                   )}
