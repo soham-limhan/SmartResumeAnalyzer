@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, BookOpen, Briefcase, Award, FolderGit, Layout,
   Plus, Trash2, ArrowLeft, ArrowRight, Download, FileText,
-  Sparkles, CheckCircle, AlertCircle, Printer, Wrench, Upload
+  Sparkles, CheckCircle, AlertCircle, Printer, Wrench, Upload, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -318,6 +318,22 @@ export default function ResumeBuilderPage() {
   const handleImportManualEdit = useCallback(() => {
     dismissAllImportModals();
   }, [dismissAllImportModals]);
+
+  const handleClearResume = useCallback(() => {
+    const confirmed = window.confirm(
+      'Clear all resume fields? This will erase everything you have entered and cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    setResumeData(INITIAL_RESUME_STATE);
+    setEduForm({ degree: '', institution: '', startDate: '', endDate: '', gpa: '', description: '' });
+    setExpForm({ jobTitle: '', company: '', location: '', startDate: '', endDate: '', current: false, responsibilities: '', achievements: '' });
+    setProjForm({ projectName: '', description: '', technologies: '', githubLink: '', liveDemoLink: '' });
+    setTagInputs({ technical: '', soft: '', languages: '', certifications: '' });
+    setActiveStep(1);
+    setError(null);
+    localStorage.removeItem('profilex-ai-builder-data');
+  }, []);
 
   // Compute preview data containing in-progress input values
   const getPreviewResumeData = () => {
@@ -742,6 +758,16 @@ export default function ResumeBuilderPage() {
               >
                 <Upload className="w-3 h-3" />
                 Import Resume
+              </button>
+
+              {/* Clear resume button */}
+              <button
+                onClick={handleClearResume}
+                className="flex items-center gap-1.5 text-[10.5px] font-semibold text-destructive/70 bg-destructive/8 hover:bg-destructive/15 border border-destructive/20 px-2.5 py-1 rounded-full transition-all"
+                title="Clear all resume fields"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Clear
               </button>
 
               {user && (
