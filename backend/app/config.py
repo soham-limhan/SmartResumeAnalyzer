@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # AI Provider — set PROFILEX_AI_GROQ_API_KEY to use Groq cloud,
     # otherwise falls back to local Ollama.
     groq_api_key: Optional[str] = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "qwen/qwen3-32b"
 
     # Ollama (local fallback)
     ollama_host: str = "http://localhost:11434"
