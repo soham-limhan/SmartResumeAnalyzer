@@ -8,6 +8,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+@router.get("/health")
+async def health_check():
+    """Check if the API is running."""
+    return {"status": "ok"}
+
 @router.get("/stats")
 async def get_realtime_stats():
     """Get aggregate statistics across all uploaded resumes."""
