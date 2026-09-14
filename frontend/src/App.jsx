@@ -19,6 +19,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import EnhancePage from '@/pages/EnhancePage';
 import ResumeBuilderPage from '@/pages/ResumeBuilderPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 function DashboardLayout() {
   return (
@@ -58,6 +59,9 @@ function AnimatedRoutes() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
+
+        {/* 404 Catch-All Route */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>
   );
