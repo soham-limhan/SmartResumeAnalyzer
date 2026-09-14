@@ -358,3 +358,109 @@ class ImportedResume(BaseModel):
     extracted_text_length: int = 0
     filename: str = ""
 
+
+# ─── Mock Interview Schemas ───────────────────────────────────────────────────
+
+class InterviewQuestionItem(BaseModel):
+    """A single generated mock interview question."""
+    id: str = Field(default_factory=lambda: f"q_{uuid.uuid4().hex[:6]}")
+    question: str
+    difficulty: str = Field(default="medium", description="easy, medium, or hard")
+    category: str = Field(default="Technical Architecture", description="Question category")
+    time_limit_seconds: int = Field(default=120, description="Suggested time limit in seconds")
+    key_points_expected: List[str] = Field(default_factory=list, description="Key concepts expected in response")
+    sample_ideal_answer: str = Field(default="", description="Ideal model answer for benchmarking")
+
+
+class InterviewGenerateRequest(BaseModel):
+    """Request payload to generate interview questions."""
+    topic: str = Field(..., min_length=2, description="Interview topic or role")
+    difficulty: str = Field(default="medium", description="easy, medium, hard, or adaptive")
+    count: int = Field(default=5, ge=1, le=10, description="Number of questions to generate")
+    experience_level: Optional[str] = Field(default="mid", description="junior, mid, senior, or executive")
+    resume_text: Optional[str] = Field(default=None, description="Optional resume context for tailored questions")
+
+
+class InterviewGenerateResponse(BaseModel):
+    """Response containing generated questions."""
+    topic: str
+    difficulty: str
+    questions: List[InterviewQuestionItem]
+
+
+class InterviewTranscribeResponse(BaseModel):
+    """Result of transcribing user's spoken answer audio."""
+    text: str
+    duration_seconds: Optional[float] = None
+    confidence: Optional[float] = 1.0
+
+
+class InterviewAnswerSubmission(BaseModel):
+    """Candidate's submitted answer for a specific question."""
+    question_id: str
+    question: str
+    user_answer: str
+    audio_duration_seconds: Optional[float] = None
+
+
+class InterviewEvaluateRequest(BaseModel):
+    """Request payload to evaluate all candidate answers."""
+    topic: str
+    difficulty: str
+    answers: List[InterviewAnswerSubmission]
+
+
+class InterviewBandScore(BaseModel):
+    """Score and evaluation for an individual competency band."""
+    band: str
+    score: int = Field(ge=0, le=100)
+    description: str
+
+
+class InterviewCommunicationMetrics(BaseModel):
+    """Verbal delivery and communication evaluation."""
+    fluency: str = "Moderate"
+    clarity: str = "High"
+    conciseness: str = "Well Balanced"
+    tone: str = "Confident & Professional"
+    feedback: str = ""
+
+
+class InterviewQuestionEvaluation(BaseModel):
+    """Detailed evaluation of a single question answer."""
+    question_id: str
+    question: str
+    user_answer: str
+    score: int = Field(ge=0, le=100)
+    strengths: List[str] = Field(default_factory=list)
+    missing_points: List[str] = Field(default_factory=list)
+    ideal_answer: str = ""
+    specific_feedback: str = ""
+
+
+class InterviewEvaluationResult(BaseModel):
+    """Comprehensive multi-band interview evaluation."""
+    overall_score: int = Field(ge=0, le=100)
+    performance_band: str = "Strong Hire"
+    confidence_score: int = Field(ge=0, le=100)
+    summary: str
+    band_scores: List[InterviewBandScore] = Field(default_factory=list)
+    communication_metrics: Optional[InterviewCommunicationMetrics] = None
+    strengths: List[str] = Field(default_factory=list)
+    areas_for_improvement: List[str] = Field(default_factory=list)
+    question_evaluations: List[InterviewQuestionEvaluation] = Field(default_factory=list)
+    recruiter_verdict: str = ""
+    actionable_roadmap: List[str] = Field(default_factory=list)
+
+
+class MockInterviewSessionRecord(BaseModel):
+    """Persisted interview session record."""
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    user_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    topic: str
+    difficulty: str
+    questions: List[InterviewQuestionItem] = Field(default_factory=list)
+    answers: List[InterviewAnswerSubmission] = Field(default_factory=list)
+    evaluation: Optional[InterviewEvaluationResult] = None
+

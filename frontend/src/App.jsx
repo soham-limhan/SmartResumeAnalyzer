@@ -19,6 +19,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import EnhancePage from '@/pages/EnhancePage';
 import ResumeBuilderPage from '@/pages/ResumeBuilderPage';
+import MockInterviewPage from '@/pages/MockInterviewPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 function DashboardLayout() {
@@ -53,6 +54,8 @@ function AnimatedRoutes() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UploadPage />} />
           <Route path="/resume-builder" element={<ResumeBuilderPage />} />
+          <Route path="/mock-interview" element={<MockInterviewPage />} />
+          <Route path="/mock-interview/:id" element={<MockInterviewPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/enhance/:id" element={<EnhancePage />} />
           <Route path="/batch-results" element={<BatchResultsPage />} />

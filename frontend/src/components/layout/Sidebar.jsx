@@ -13,6 +13,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   FileText,
+  Mic,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -26,6 +27,7 @@ export default function Sidebar() {
   const navItems = [
     { to: '/dashboard', icon: Upload, label: 'Analyze', description: 'Upload & analyze resume' },
     { to: '/resume-builder', icon: FileText, label: 'Resume Builder', description: 'Create a new resume' },
+    { to: '/mock-interview', icon: Mic, label: 'Mock Interview', description: 'Voice practice & scoring' },
     ...(batchResults ? [{ to: '/batch-results', icon: ClipboardList, label: 'Batch Results', description: 'Multi-resume results' }] : []),
     { to: '/history', icon: History, label: 'History', description: 'Past analyses' },
     { to: '/settings', icon: Settings, label: 'Settings', description: 'Preferences' },

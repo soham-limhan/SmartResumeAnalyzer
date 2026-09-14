@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Download, Brain, CheckCircle2, XCircle, Lightbulb,
   HelpCircle, Target, TrendingUp, Briefcase, Sparkles, Loader2,
-  BarChart3 as BarChartIcon, Star, Zap, Wand2, AlertTriangle,
+  BarChart3 as BarChartIcon, Star, Zap, Wand2, AlertTriangle, Mic,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer, Cell, RadarChart,
@@ -572,6 +572,27 @@ export default function AnalysisPage() {
               <span className="ml-auto text-xs text-muted-foreground">
                 {(analysis.interview_questions || []).length} questions
               </span>
+            </div>
+
+            {/* Voice Mock Interview Interactive Banner */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-gradient-to-r from-indigo-500/15 via-primary/10 to-transparent border border-indigo-500/25 mb-4 shadow-sm">
+              <div>
+                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Mic className="w-4 h-4 text-primary animate-pulse" />
+                  Practice Live Spoken Mock Interview
+                </h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Speak your answers into the microphone, get AI Whisper transcription, and receive multi-band scores on communication, depth, and confidence.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate('/mock-interview')}
+                className="text-xs font-semibold rounded-xl gap-1.5 h-8 flex-shrink-0 shadow-sm"
+              >
+                <Mic className="w-3.5 h-3.5" />
+                Launch Mock Interview
+              </Button>
             </div>
 
             {/* STAR method callout */}

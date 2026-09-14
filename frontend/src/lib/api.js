@@ -147,4 +147,57 @@ export async function generateInterviewAnswer(analysisId, question) {
   return response.data;
 }
 
+// ─── Mock Interview APIs ───────────────────────────────────────────────────────
+
+export async function generateInterviewQuestions({
+  topic,
+  difficulty = 'medium',
+  count = 5,
+  experience_level = 'mid',
+  resume_text = null,
+}) {
+  const response = await api.post('/interview/generate', {
+    topic,
+    difficulty,
+    count,
+    experience_level,
+    resume_text,
+  });
+  return response.data;
+}
+
+export async function transcribeInterviewAudio(audioBlob, filename = 'speech.webm') {
+  const formData = new FormData();
+  formData.append('audio', audioBlob, filename);
+
+  const response = await api.post('/interview/transcribe', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+}
+
+export async function evaluateInterviewSession({ topic, difficulty, answers }) {
+  const response = await api.post('/interview/evaluate', {
+    topic,
+    difficulty,
+    answers,
+  });
+  return response.data;
+}
+
+export async function getInterviewHistory() {
+  const response = await api.get('/interview/history');
+  return response.data;
+}
+
+export async function getInterviewSession(sessionId) {
+  const response = await api.get(`/interview/${sessionId}`);
+  return response.data;
+}
+
+export async function deleteInterviewSession(sessionId) {
+  const response = await api.delete(`/interview/${sessionId}`);
+  return response.data;
+}
+
 export default api;

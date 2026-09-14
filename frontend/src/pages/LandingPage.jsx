@@ -4,18 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, Upload, BarChart3, Brain, Target, Zap, FileCheck, MessageSquare,
-  ArrowRight, Search, Star, CheckCircle2, FileText, Eye, ChevronDown, Menu
+  ArrowRight, Search, Star, CheckCircle2, FileText, Eye, ChevronDown, Menu, Mic
 } from 'lucide-react';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 import { Button } from '@/components/ui/button';
 
 const features = [
   { icon: BarChart3, title: 'ATS Compatibility Scan', description: 'Analyze your resume across 15+ parsing rules that modern applicant tracking systems use to filter candidates.' },
-  { icon: Brain, title: 'Deep Content Audit', description: 'Advanced review of bullet impact, action verbs, and structure with direct replacement suggestions.' },
+  { icon: Mic, title: 'AI Mock Voice Interview', description: 'Practice real-time spoken interviews with microphone recording, AI speech-to-text, and multi-band scorecards.' },
   { icon: Target, title: 'Role Targeting', description: 'Compare your CV directly against a target job description and map missing skills.' },
   { icon: Search, title: 'Keyword Extraction', description: 'Identify industry-specific keywords and term frequencies to boost matching algorithms.' },
   { icon: FileText, title: 'Resume Builder', description: 'Draft a clean, professional, and ATS-compliant resume directly using structured templates.' },
-  { icon: MessageSquare, title: 'Interview Simulator', description: 'Generate realistic interview questions based directly on your parsed resume sections.' },
+  { icon: Brain, title: 'AI Resume Enhancer', description: 'Rewrite bullet points and summaries tailored to corporate, technical, and executive tracks.' },
 ];
 
 
@@ -254,11 +254,19 @@ export default function LandingPage() {
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={() => navigate('/mock-interview')}
+                  className="px-6 py-5 rounded-lg border-border hover:bg-muted text-xs sm:text-sm font-bold"
+                >
+                  <Mic className="w-4 h-4 mr-2 text-primary" />
+                  AI Mock Interview
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => navigate('/resume-builder')}
                   className="px-6 py-5 rounded-lg border-border hover:bg-muted text-xs sm:text-sm font-bold"
                 >
                   <FileText className="w-4 h-4 mr-2 text-primary" />
-                  Use Resume Builder
+                  Resume Builder
                 </Button>
               </div>
 
